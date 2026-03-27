@@ -1,32 +1,33 @@
 import { useState, useEffect } from 'react'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import AnalysisChat from './components/AnalysisChat.jsx'
+import { Icon } from './components/Icons.jsx'
 import './App.css'
 
 const SIDEBAR_SECTIONS = [
   {
     title: 'Workspace',
     items: [
-      { id: 'dashboard', icon: '~', label: 'Dashboard', active: true },
-      { id: 'deals', icon: '>', label: 'Deal Analysis' },
-      { id: 'documents', icon: '#', label: 'Documents' },
-      { id: 'timeline', icon: '|', label: 'Timeline' },
+      { id: 'dashboard', label: 'Dashboard', active: true },
+      { id: 'deals', label: 'Deal Analysis' },
+      { id: 'documents', label: 'Documents' },
+      { id: 'timeline', label: 'Timeline' },
     ],
   },
   {
     title: 'Integrations',
     items: [
-      { id: 'email', icon: '@', label: 'Email (Gmail)' },
-      { id: 'calendar', icon: '+', label: 'Calendar' },
-      { id: 'notion', icon: 'N', label: 'Notion' },
-      { id: 'linear', icon: 'L', label: 'Linear' },
+      { id: 'email', label: 'Email (Gmail)' },
+      { id: 'calendar', label: 'Calendar' },
+      { id: 'notion', label: 'Notion' },
+      { id: 'linear', label: 'Linear' },
     ],
   },
   {
     title: 'Settings',
     items: [
-      { id: 'team', icon: '*', label: 'Team' },
-      { id: 'settings', icon: '%', label: 'Settings' },
+      { id: 'team', label: 'Team' },
+      { id: 'settings', label: 'Settings' },
     ],
   },
 ]
@@ -71,14 +72,14 @@ const DEALS = [
 ]
 
 const INTEGRATIONS = [
-  { id: 'gmail', icon: '@', name: 'Gmail', description: 'Email sync & thread tracking' },
-  { id: 'gcal', icon: '+', name: 'Google Calendar', description: 'Meeting scheduling & deadlines' },
-  { id: 'notion', icon: 'N', name: 'Notion', description: 'Knowledge base & wiki' },
-  { id: 'linear', icon: 'L', name: 'Linear', description: 'Issue tracking & workflows' },
-  { id: 'supabase', icon: 'S', name: 'Supabase', description: 'Database & auth' },
-  { id: 'netlify', icon: '^', name: 'Netlify', description: 'Deploy & hosting' },
-  { id: 'github', icon: '/', name: 'GitHub', description: 'Code & version control' },
-  { id: 'cloudflare', icon: 'C', name: 'Cloudflare', description: 'Edge & storage' },
+  { id: 'gmail', name: 'Gmail', description: 'Email sync & thread tracking' },
+  { id: 'gcal', name: 'Google Calendar', description: 'Meeting scheduling & deadlines' },
+  { id: 'notion', name: 'Notion', description: 'Knowledge base & wiki' },
+  { id: 'linear', name: 'Linear', description: 'Issue tracking & workflows' },
+  { id: 'supabase', name: 'Supabase', description: 'Database & auth' },
+  { id: 'netlify', name: 'Netlify', description: 'Deploy & hosting' },
+  { id: 'github', name: 'GitHub', description: 'Code & version control' },
+  { id: 'cloudflare', name: 'Cloudflare', description: 'Edge & storage' },
 ]
 
 function App() {
@@ -133,7 +134,7 @@ function App() {
                   tabIndex={0}
                   aria-current={activeItem === item.id ? 'page' : undefined}
                 >
-                  <span className="sidebar-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="sidebar-icon" aria-hidden="true"><Icon name={item.id} /></span>
                   {item.label}
                 </div>
               ))}
@@ -171,9 +172,9 @@ function App() {
                       </div>
                       <p className="card-description">{deal.description}</p>
                       <div className="card-meta">
-                        <span className="card-meta-item"># {deal.docs} docs</span>
-                        <span className="card-meta-item">* {deal.parties} parties</span>
-                        <span className="card-meta-item">~ {deal.updated}</span>
+                        <span className="card-meta-item">{deal.docs} docs</span>
+                        <span className="card-meta-item">{deal.parties} parties</span>
+                        <span className="card-meta-item">{deal.updated}</span>
                       </div>
                     </div>
                   ))}
@@ -185,7 +186,7 @@ function App() {
                 <div className="integrations-grid">
                   {INTEGRATIONS.map((integration) => (
                     <div key={integration.id} className="integration-card">
-                      <div className="integration-icon">{integration.icon}</div>
+                      <div className="integration-icon"><Icon name={integration.id} /></div>
                       <div className="integration-info">
                         <h4>{integration.name}</h4>
                         <p>{integration.description}</p>

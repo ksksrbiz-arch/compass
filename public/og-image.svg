@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0a0f"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#grad)" opacity="0.4"/>
+  <defs>
+    <radialGradient id="grad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Compass icon -->
+  <circle cx="600" cy="250" r="60" stroke="#6366f1" stroke-width="2.5" fill="none"/>
+  <polygon points="600,190 608,240 600,230 592,240" fill="#6366f1"/>
+  <polygon points="600,310 592,260 600,270 608,260" fill="#818cf8"/>
+  <circle cx="600" cy="250" r="5" fill="#6366f1"/>
+  <!-- Title -->
+  <text x="600" y="370" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#e4e4ed" letter-spacing="-1">Compass <tspan fill="#6366f1">AI</tspan></text>
+  <!-- Subtitle -->
+  <text x="600" y="415" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#8888a0">AI-Powered Legal Intelligence Agent</text>
+  <!-- Feature pills -->
+  <rect x="280" y="460" width="160" height="32" rx="16" fill="rgba(99,102,241,0.15)"/>
+  <text x="360" y="481" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#6366f1">Contract Analysis</text>
+  <rect x="460" y="460" width="140" height="32" rx="16" fill="rgba(99,102,241,0.15)"/>
+  <text x="530" y="481" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#6366f1">Legal Research</text>
+  <rect x="620" y="460" width="150" height="32" rx="16" fill="rgba(99,102,241,0.15)"/>
+  <text x="695" y="481" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#6366f1">IRAC Reasoning</text>
+  <rect x="790" y="460" width="140" height="32" rx="16" fill="rgba(99,102,241,0.15)"/>
+  <text x="860" y="481" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#6366f1">Due Diligence</text>
+  <!-- Bottom accent line -->
+  <rect x="400" y="530" width="400" height="2" rx="1" fill="#6366f1" opacity="0.3"/>
+</svg>

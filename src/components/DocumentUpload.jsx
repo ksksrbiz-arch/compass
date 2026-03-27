@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import PropTypes from 'prop-types'
 
 export default function DocumentUpload({ onDocumentLoaded }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -104,4 +105,8 @@ export default function DocumentUpload({ onDocumentLoaded }) {
       {error && <p className="upload-error">{error}</p>}
     </div>
   )
+}
+
+DocumentUpload.propTypes = {
+  onDocumentLoaded: PropTypes.func.isRequired,
 }

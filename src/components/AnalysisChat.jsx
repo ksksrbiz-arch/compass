@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import PropTypes from 'prop-types'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -159,4 +160,14 @@ export default function AnalysisChat({ document, onBack }) {
       </form>
     </div>
   )
+}
+
+AnalysisChat.propTypes = {
+  document: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    size: PropTypes.number.isRequired,
+    base64: PropTypes.string.isRequired,
+    mediaType: PropTypes.string.isRequired,
+  }).isRequired,
+  onBack: PropTypes.func.isRequired,
 }

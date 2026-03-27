@@ -227,6 +227,12 @@
   gap: 4px;
 }
 
+.card-meta-item + .card-meta-item::before {
+  content: '\00b7';
+  margin-right: 4px;
+  color: var(--color-text-muted);
+}
+
 /* Integration Cards */
 .integrations-grid {
   display: grid;

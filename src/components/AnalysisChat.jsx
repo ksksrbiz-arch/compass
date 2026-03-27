@@ -122,7 +122,7 @@ export default function AnalysisChat({ document, onBack }) {
         {messages.map((msg, i) => (
           <div key={i} className={`message message-${msg.role}`}>
             <div className="message-label">
-              {msg.role === 'assistant' ? 'Compass' : 'You'}
+              {msg.role === 'assistant' ? 'Compass AI' : 'You'}
             </div>
             <div className="message-content">{msg.content}</div>
           </div>
@@ -130,7 +130,7 @@ export default function AnalysisChat({ document, onBack }) {
 
         {isLoading && (
           <div className="message message-assistant">
-            <div className="message-label">Compass</div>
+            <div className="message-label">Compass AI</div>
             <div className="message-content">
               <span className="typing-indicator" />
             </div>
@@ -146,6 +146,7 @@ export default function AnalysisChat({ document, onBack }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={structureExtracted ? 'Ask about this document...' : 'Extracting structure...'}
+          aria-label="Ask a question about the document"
           disabled={isLoading || !structureExtracted}
         />
         <button

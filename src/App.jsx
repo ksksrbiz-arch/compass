@@ -105,12 +105,12 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <header className="header" role="banner">
         <div className="header-left">
           <div className="logo">
-            <span>&bull;</span> Compass
+            <span>&bull;</span> Compass <span className="logo-ai">AI</span>
           </div>
-          <span className="badge">v2</span>
         </div>
         <div className="header-right">
           <button className="btn btn-ghost">Invite</button>
@@ -119,17 +119,21 @@ function App() {
       </header>
 
       <div className="layout">
-        <nav className="sidebar">
+        <nav className="sidebar" aria-label="Main navigation">
           {SIDEBAR_SECTIONS.map((section) => (
-            <div key={section.title} className="sidebar-section">
+            <div key={section.title} className="sidebar-section" role="group" aria-label={section.title}>
               <div className="sidebar-section-title">{section.title}</div>
               {section.items.map((item) => (
                 <div
                   key={item.id}
                   className={`sidebar-item ${activeItem === item.id ? 'active' : ''}`}
                   onClick={() => setActiveItem(item.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveItem(item.id) } }}
+                  role="button"
+                  tabIndex={0}
+                  aria-current={activeItem === item.id ? 'page' : undefined}
                 >
-                  <span className="sidebar-icon">{item.icon}</span>
+                  <span className="sidebar-icon" aria-hidden="true">{item.icon}</span>
                   {item.label}
                 </div>
               ))}
@@ -137,7 +141,7 @@ function App() {
           ))}
         </nav>
 
-        <main className="main">
+        <main className="main" id="main-content">
           {view === 'analysis' && loadedDocument ? (
             <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
           ) : (

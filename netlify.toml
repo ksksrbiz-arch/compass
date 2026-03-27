@@ -34,6 +34,7 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     X-XSS-Protection = "1; mode=block"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.netlify.app"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
 # Cache static assets aggressively
 [[headers]]

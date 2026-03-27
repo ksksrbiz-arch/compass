@@ -1,2 +1,2 @@
-# compass
-Compass — AI-powered legal intelligence workspace for deal anlysis
+# Compass AI
+Compass AI — AI-powered legal intelligence workspace for deal analysis

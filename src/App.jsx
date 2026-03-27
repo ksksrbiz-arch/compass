@@ -97,10 +97,10 @@ function App() {
 
   useEffect(() => {
     const titles = {
-      dashboard: 'Dashboard — Compass',
-      analysis: 'Document Analysis — Compass',
+      dashboard: 'Dashboard — Compass AI',
+      analysis: 'Document Analysis — Compass AI',
     }
-    document.title = titles[view] || 'Compass — AI-Powered Legal Intelligence'
+    document.title = titles[view] || 'Compass AI — Your AI-Powered Legal Intelligence Agent'
   }, [view])
 
   return (

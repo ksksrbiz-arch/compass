@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import DocumentUpload from './components/DocumentUpload.jsx'
+import AnalysisChat from './components/AnalysisChat.jsx'
 import './App.css'
 
 const SIDEBAR_SECTIONS = [
@@ -81,6 +83,17 @@ const INTEGRATIONS = [
 
 function App() {
   const [activeItem, setActiveItem] = useState('dashboard')
+  const [loadedDocument, setLoadedDocument] = useState(null)
+  const [view, setView] = useState('dashboard')
+
+  const handleDocumentLoaded = (doc) => {
+    setLoadedDocument(doc)
+    setView('analysis')
+  }
+
+  const handleBackToDashboard = () => {
+    setView('dashboard')
+  }
 
   return (
     <div className="app">
@@ -117,49 +130,60 @@ function App() {
         </nav>
 
         <main className="main">
-          <div className="page-header">
-            <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">
-              AI-powered legal intelligence workspace for deal analysis
-            </p>
-          </div>
+          {view === 'analysis' && loadedDocument ? (
+            <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
+          ) : (
+            <>
+              <div className="page-header">
+                <h1 className="page-title">Dashboard</h1>
+                <p className="page-subtitle">
+                  AI-powered legal intelligence workspace for deal analysis
+                </p>
+              </div>
 
-          <div className="section">
-            <h2 className="section-title">Active Deals</h2>
-            <div className="cards-grid">
-              {DEALS.map((deal) => (
-                <div key={deal.id} className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">{deal.title}</h3>
-                    <span className={`card-status ${deal.status}`}>
-                      {deal.status}
-                    </span>
-                  </div>
-                  <p className="card-description">{deal.description}</p>
-                  <div className="card-meta">
-                    <span className="card-meta-item"># {deal.docs} docs</span>
-                    <span className="card-meta-item">* {deal.parties} parties</span>
-                    <span className="card-meta-item">~ {deal.updated}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              <div className="section">
+                <h2 className="section-title">Analyze Document</h2>
+                <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
+              </div>
 
-          <div className="section">
-            <h2 className="section-title">MCP Integrations</h2>
-            <div className="integrations-grid">
-              {INTEGRATIONS.map((integration) => (
-                <div key={integration.id} className="integration-card">
-                  <div className="integration-icon">{integration.icon}</div>
-                  <div className="integration-info">
-                    <h4>{integration.name}</h4>
-                    <p>{integration.description}</p>
-                  </div>
+              <div className="section">
+                <h2 className="section-title">Active Deals</h2>
+                <div className="cards-grid">
+                  {DEALS.map((deal) => (
+                    <div key={deal.id} className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">{deal.title}</h3>
+                        <span className={`card-status ${deal.status}`}>
+                          {deal.status}
+                        </span>
+                      </div>
+                      <p className="card-description">{deal.description}</p>
+                      <div className="card-meta">
+                        <span className="card-meta-item"># {deal.docs} docs</span>
+                        <span className="card-meta-item">* {deal.parties} parties</span>
+                        <span className="card-meta-item">~ {deal.updated}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+
+              <div className="section">
+                <h2 className="section-title">MCP Integrations</h2>
+                <div className="integrations-grid">
+                  {INTEGRATIONS.map((integration) => (
+                    <div key={integration.id} className="integration-card">
+                      <div className="integration-icon">{integration.icon}</div>
+                      <div className="integration-info">
+                        <h4>{integration.name}</h4>
+                        <p>{integration.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -73,6 +73,10 @@ export default function DocumentUpload({ onDocumentLoaded }) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload PDF document"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick() } }}
     >
       <input
         ref={fileInputRef}
@@ -89,7 +93,7 @@ export default function DocumentUpload({ onDocumentLoaded }) {
         </div>
       ) : (
         <div className="upload-content">
-          <div className="upload-icon">{isDragging ? '>' : '+'}</div>
+          <div className="upload-icon" aria-hidden="true">{isDragging ? '>' : '+'}</div>
           <p className="upload-text">
             {isDragging ? 'Drop PDF here' : 'Drop a contract PDF or click to upload'}
           </p>

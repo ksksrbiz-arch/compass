@@ -1,32 +1,33 @@
 import { useState, useEffect } from 'react'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import AnalysisChat from './components/AnalysisChat.jsx'
+import { Icon } from './components/Icons.jsx'
 import './App.css'
 
 const SIDEBAR_SECTIONS = [
   {
     title: 'Workspace',
     items: [
-      { id: 'dashboard', icon: '~', label: 'Dashboard', active: true },
-      { id: 'deals', icon: '>', label: 'Deal Analysis' },
-      { id: 'documents', icon: '#', label: 'Documents' },
-      { id: 'timeline', icon: '|', label: 'Timeline' },
+      { id: 'dashboard', label: 'Dashboard', active: true },
+      { id: 'deals', label: 'Deal Analysis' },
+      { id: 'documents', label: 'Documents' },
+      { id: 'timeline', label: 'Timeline' },
     ],
   },
   {
     title: 'Integrations',
     items: [
-      { id: 'email', icon: '@', label: 'Email (Gmail)' },
-      { id: 'calendar', icon: '+', label: 'Calendar' },
-      { id: 'notion', icon: 'N', label: 'Notion' },
-      { id: 'linear', icon: 'L', label: 'Linear' },
+      { id: 'email', label: 'Email (Gmail)' },
+      { id: 'calendar', label: 'Calendar' },
+      { id: 'notion', label: 'Notion' },
+      { id: 'linear', label: 'Linear' },
     ],
   },
   {
     title: 'Settings',
     items: [
-      { id: 'team', icon: '*', label: 'Team' },
-      { id: 'settings', icon: '%', label: 'Settings' },
+      { id: 'team', label: 'Team' },
+      { id: 'settings', label: 'Settings' },
     ],
   },
 ]
@@ -71,14 +72,14 @@ const DEALS = [
 ]
 
 const INTEGRATIONS = [
-  { id: 'gmail', icon: '@', name: 'Gmail', description: 'Email sync & thread tracking' },
-  { id: 'gcal', icon: '+', name: 'Google Calendar', description: 'Meeting scheduling & deadlines' },
-  { id: 'notion', icon: 'N', name: 'Notion', description: 'Knowledge base & wiki' },
-  { id: 'linear', icon: 'L', name: 'Linear', description: 'Issue tracking & workflows' },
-  { id: 'supabase', icon: 'S', name: 'Supabase', description: 'Database & auth' },
-  { id: 'netlify', icon: '^', name: 'Netlify', description: 'Deploy & hosting' },
-  { id: 'github', icon: '/', name: 'GitHub', description: 'Code & version control' },
-  { id: 'cloudflare', icon: 'C', name: 'Cloudflare', description: 'Edge & storage' },
+  { id: 'gmail', name: 'Gmail', description: 'Email sync & thread tracking' },
+  { id: 'gcal', name: 'Google Calendar', description: 'Meeting scheduling & deadlines' },
+  { id: 'notion', name: 'Notion', description: 'Knowledge base & wiki' },
+  { id: 'linear', name: 'Linear', description: 'Issue tracking & workflows' },
+  { id: 'supabase', name: 'Supabase', description: 'Database & auth' },
+  { id: 'netlify', name: 'Netlify', description: 'Deploy & hosting' },
+  { id: 'github', name: 'GitHub', description: 'Code & version control' },
+  { id: 'cloudflare', name: 'Cloudflare', description: 'Edge & storage' },
 ]
 
 function App() {
@@ -105,12 +106,12 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <header className="header" role="banner">
         <div className="header-left">
           <div className="logo">
-            <span>&bull;</span> Compass
+            <span>&bull;</span> Compass <span className="logo-ai">AI</span>
           </div>
-          <span className="badge">v2</span>
         </div>
         <div className="header-right">
           <button className="btn btn-ghost" aria-label="Invite team member">Invite</button>
@@ -119,9 +120,9 @@ function App() {
       </header>
 
       <div className="layout">
-        <nav className="sidebar">
+        <nav className="sidebar" aria-label="Main navigation">
           {SIDEBAR_SECTIONS.map((section) => (
-            <div key={section.title} className="sidebar-section">
+            <div key={section.title} className="sidebar-section" role="group" aria-label={section.title}>
               <div className="sidebar-section-title">{section.title}</div>
               {section.items.map((item) => (
                 <button
@@ -132,7 +133,7 @@ function App() {
                   aria-label={item.label}
                   aria-current={activeItem === item.id ? 'page' : undefined}
                 >
-                  <span className="sidebar-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="sidebar-icon" aria-hidden="true"><Icon name={item.id} /></span>
                   {item.label}
                 </button>
               ))}
@@ -140,7 +141,7 @@ function App() {
           ))}
         </nav>
 
-        <main className="main">
+        <main className="main" id="main-content">
           {view === 'analysis' && loadedDocument ? (
             <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
           ) : (
@@ -170,9 +171,9 @@ function App() {
                       </div>
                       <p className="card-description">{deal.description}</p>
                       <div className="card-meta">
-                        <span className="card-meta-item"># {deal.docs} docs</span>
-                        <span className="card-meta-item">* {deal.parties} parties</span>
-                        <span className="card-meta-item">~ {deal.updated}</span>
+                        <span className="card-meta-item">{deal.docs} docs</span>
+                        <span className="card-meta-item">{deal.parties} parties</span>
+                        <span className="card-meta-item">{deal.updated}</span>
                       </div>
                     </div>
                   ))}
@@ -184,7 +185,7 @@ function App() {
                 <div className="integrations-grid">
                   {INTEGRATIONS.map((integration) => (
                     <div key={integration.id} className="integration-card">
-                      <div className="integration-icon" aria-hidden="true">{integration.icon}</div>
+                      <div className="integration-icon" aria-hidden="true"><Icon name={integration.id} /></div>
                       <div className="integration-info">
                         <h4>{integration.name}</h4>
                         <p>{integration.description}</p>

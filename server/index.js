@@ -90,7 +90,7 @@ app.post('/api/analyze', authMiddleware, async (req, res) => {
     })
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6-20250627',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: conversationMessages,

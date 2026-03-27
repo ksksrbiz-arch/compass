@@ -1,12 +1,50 @@
 import Anthropic from '@anthropic-ai/sdk'
 import express from 'express'
 import cors from 'cors'
+import rateLimit from 'express-rate-limit'
 
 const app = express()
 const port = process.env.PORT || 3001
 
-app.use(cors())
+// --- CORS: restrict to known origins ---
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim())
+
+app.use(cors({
+  origin(origin, callback) {
+    // allow requests with no origin (curl, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+}))
+
+// --- Rate limiting: 60 req/min per IP ---
+app.use('/api/', rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Rate limit exceeded. Try again in a minute.' },
+}))
+
 app.use(express.json({ limit: '25mb' }))
+
+// --- Auth stub: static bearer token ---
+const AUTH_TOKEN = process.env.COMPASS_AUTH_TOKEN
+
+function authMiddleware(req, res, next) {
+  if (!AUTH_TOKEN) return next() // no token configured = open (dev mode)
+
+  const header = req.headers.authorization
+  if (!header || header !== `Bearer ${AUTH_TOKEN}`) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  next()
+}
 
 const anthropic = new Anthropic()
 
@@ -26,7 +64,7 @@ Guidelines:
 - When uncertain, say so — do not fabricate clause references
 - Prioritize actionable insights over exhaustive summaries`
 
-app.post('/api/analyze', async (req, res) => {
+app.post('/api/analyze', authMiddleware, async (req, res) => {
   try {
     const { document, message, history = [] } = req.body
 

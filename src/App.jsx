@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import AnalysisChat from './components/AnalysisChat.jsx'
 import './App.css'
@@ -94,6 +94,14 @@ function App() {
   const handleBackToDashboard = () => {
     setView('dashboard')
   }
+
+  useEffect(() => {
+    const titles = {
+      dashboard: 'Dashboard — Compass',
+      analysis: 'Document Analysis — Compass',
+    }
+    document.title = titles[view] || 'Compass — AI-Powered Legal Intelligence'
+  }, [view])
 
   return (
     <div className="app">

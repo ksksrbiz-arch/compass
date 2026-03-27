@@ -1,7 +1,7 @@
 {
-  "name": "Compass — AI Legal Intelligence",
-  "short_name": "Compass",
-  "description": "AI-powered legal intelligence workspace for contract analysis and deal management.",
+  "name": "Compass AI — Legal Intelligence Agent",
+  "short_name": "Compass AI",
+  "description": "Your AI-powered legal intelligence agent. Full-spectrum legal reasoning powered by Claude.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",

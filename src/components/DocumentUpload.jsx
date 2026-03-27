@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import { UploadIcon, ArrowDownIcon } from './Icons.jsx'
 
 export default function DocumentUpload({ onDocumentLoaded }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -94,7 +95,7 @@ export default function DocumentUpload({ onDocumentLoaded }) {
         </div>
       ) : (
         <div className="upload-content">
-          <div className="upload-icon">{isDragging ? '>' : '+'}</div>
+          <div className="upload-icon">{isDragging ? <ArrowDownIcon /> : <UploadIcon />}</div>
           <p className="upload-text">
             {isDragging ? 'Drop PDF here' : 'Drop a contract PDF or click to upload'}
           </p>

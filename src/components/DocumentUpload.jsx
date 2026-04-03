@@ -95,11 +95,11 @@ export default function DocumentUpload({ onDocumentLoaded }) {
         </div>
       ) : (
         <div className="upload-content">
-          <div className="upload-icon">
+          <div className="upload-icon" aria-hidden="true">
             {isDragging ? (
-              <ArrowDownIcon aria-hidden="true" focusable="false" />
+              <ArrowDownIcon />
             ) : (
-              <UploadIcon aria-hidden="true" focusable="false" />
+              <UploadIcon />
             )}
           </div>
           <p className="upload-text">

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 
-const s = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true, focusable: 'false' }
+const s = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true, focusable: false }
+const sl = { ...s, width: 24, height: 24 }
 
 export const DashboardIcon = (props) => (
   <svg {...s} {...props}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -59,11 +60,11 @@ export const CloudIcon = (props) => (
 )
 
 export const UploadIcon = (props) => (
-  <svg {...s} width="24" height="24" {...props}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+  <svg {...sl} {...props}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
 )
 
 export const ArrowDownIcon = (props) => (
-  <svg {...s} width="24" height="24" {...props}><polyline points="7 10 12 15 17 10"/></svg>
+  <svg {...sl} {...props}><polyline points="7 10 12 15 17 10"/></svg>
 )
 
 const ICON_MAP = {

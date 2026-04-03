@@ -95,7 +95,13 @@ export default function DocumentUpload({ onDocumentLoaded }) {
         </div>
       ) : (
         <div className="upload-content">
-          <div className="upload-icon">{isDragging ? <ArrowDownIcon /> : <UploadIcon />}</div>
+          <div className="upload-icon">
+            {isDragging ? (
+              <ArrowDownIcon aria-hidden="true" focusable="false" />
+            ) : (
+              <UploadIcon aria-hidden="true" focusable="false" />
+            )}
+          </div>
           <p className="upload-text">
             {isDragging ? 'Drop PDF here' : 'Drop a contract PDF or click to upload'}
           </p>

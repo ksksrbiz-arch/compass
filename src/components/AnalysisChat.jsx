@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { escapeHtml, sanitizeMarkdown } from '../utils/sanitize.js'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -24,7 +25,7 @@ export default function AnalysisChat({ document, onBack }) {
     setIsLoading(true)
     setMessages([{
       role: 'assistant',
-      content: `Analyzing **${document.name}**... Extracting document structure and key clauses.`,
+      content: `Analyzing **${escapeHtml(document.name)}**... Extracting document structure and key clauses.`,
     }])
 
     try {
@@ -51,13 +52,13 @@ export default function AnalysisChat({ document, onBack }) {
       const data = await response.json()
       setMessages([{
         role: 'assistant',
-        content: data.content,
+        content: sanitizeMarkdown(data.content),
       }])
       setStructureExtracted(true)
     } catch (err) {
       setMessages([{
         role: 'assistant',
-        content: `Failed to analyze document: ${err.message}. Make sure the backend proxy is running.`,
+        content: `Failed to analyze document: ${escapeHtml(err.message)}. Make sure the backend proxy is running.`,
       }])
     } finally {
       setIsLoading(false)
@@ -96,11 +97,11 @@ export default function AnalysisChat({ document, onBack }) {
       }
 
       const data = await response.json()
-      setMessages(prev => [...prev, { role: 'assistant', content: data.content }])
+      setMessages(prev => [...prev, { role: 'assistant', content: sanitizeMarkdown(data.content) }])
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Error: ${err.message}`,
+        content: `Error: ${escapeHtml(err.message)}`,
       }])
     } finally {
       setIsLoading(false)
@@ -110,9 +111,9 @@ export default function AnalysisChat({ document, onBack }) {
   return (
     <div className="analysis-container">
       <div className="analysis-header">
-        <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack} aria-label="Back to dashboard">Back</button>
         <div className="analysis-doc-info">
-          <span className="analysis-doc-name">{document.name}</span>
+          <span className="analysis-doc-name">{escapeHtml(document.name)}</span>
           <span className="analysis-doc-size">
             {(document.size / 1024).toFixed(0)} KB
           </span>
@@ -154,6 +155,7 @@ export default function AnalysisChat({ document, onBack }) {
           type="submit"
           className="btn btn-primary"
           disabled={isLoading || !input.trim()}
+          aria-label="Send message"
         >
           Send
         </button>

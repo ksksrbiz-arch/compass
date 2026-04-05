@@ -114,8 +114,8 @@ function App() {
           </div>
         </div>
         <div className="header-right">
-          <button className="btn btn-ghost">Invite</button>
-          <button className="btn btn-primary">+ New Deal</button>
+          <button className="btn btn-ghost" aria-label="Invite team member">Invite</button>
+          <button className="btn btn-primary" aria-label="Create new deal">+ New Deal</button>
         </div>
       </header>
 
@@ -125,18 +125,17 @@ function App() {
             <div key={section.title} className="sidebar-section" role="group" aria-label={section.title}>
               <div className="sidebar-section-title">{section.title}</div>
               {section.items.map((item) => (
-                <div
+                <button
                   key={item.id}
+                  type="button"
                   className={`sidebar-item ${activeItem === item.id ? 'active' : ''}`}
                   onClick={() => setActiveItem(item.id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveItem(item.id) } }}
-                  role="button"
-                  tabIndex={0}
+                  aria-label={item.label}
                   aria-current={activeItem === item.id ? 'page' : undefined}
                 >
                   <span className="sidebar-icon" aria-hidden="true"><Icon name={item.id} /></span>
                   {item.label}
-                </div>
+                </button>
               ))}
             </div>
           ))}
@@ -186,7 +185,7 @@ function App() {
                 <div className="integrations-grid">
                   {INTEGRATIONS.map((integration) => (
                     <div key={integration.id} className="integration-card">
-                      <div className="integration-icon"><Icon name={integration.id} /></div>
+                      <div className="integration-icon" aria-hidden="true"><Icon name={integration.id} /></div>
                       <div className="integration-info">
                         <h4>{integration.name}</h4>
                         <p>{integration.description}</p>

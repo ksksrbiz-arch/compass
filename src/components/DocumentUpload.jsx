@@ -75,10 +75,10 @@ export default function DocumentUpload({ onDocumentLoaded }) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick() } }}
       role="button"
       tabIndex={0}
       aria-label="Upload a PDF document for analysis"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick() } }}
     >
       <input
         ref={fileInputRef}

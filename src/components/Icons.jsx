@@ -28,7 +28,7 @@ export const CalendarIcon = (props) => (
 )
 
 export const NotionIcon = (props) => (
-  <svg {...s} {...props}><path d="M4 4h16v16H4z" rx="2"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+  <svg {...s} {...props}><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
 )
 
 export const LinearIcon = (props) => (

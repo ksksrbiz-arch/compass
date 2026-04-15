@@ -529,6 +529,24 @@
   cursor: not-allowed;
 }
 
+/* Settings inputs */
+.settings-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.settings-input:focus {
+  border-color: var(--color-accent);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .header {

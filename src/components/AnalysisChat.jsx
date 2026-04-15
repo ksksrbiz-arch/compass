@@ -228,5 +228,3 @@ AnalysisChat.propTypes = {
   }).isRequired,
   onBack: PropTypes.func.isRequired,
 }
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')

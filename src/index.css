@@ -2,7 +2,7 @@
   --color-bg: #080810;
   --color-surface: #10101c;
   --color-surface-hover: #181828;
-  --color-surface-elevated: #14142000;
+  --color-surface-elevated: rgba(20, 20, 32, 0);
   --color-border: #1c1c30;
   --color-border-subtle: #161625;
   --color-text: #e6e6f0;

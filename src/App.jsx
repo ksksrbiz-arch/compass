@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import AnalysisChat from './components/AnalysisChat.jsx'
 import { Icon } from './components/Icons.jsx'
+import DealsPage from './components/pages/DealsPage.jsx'
+import DocumentsPage from './components/pages/DocumentsPage.jsx'
+import TimelinePage from './components/pages/TimelinePage.jsx'
+import IntegrationPage from './components/pages/IntegrationPage.jsx'
+import TeamPage from './components/pages/TeamPage.jsx'
+import SettingsPage from './components/pages/SettingsPage.jsx'
 import './App.css'
 
 const SIDEBAR_SECTIONS = [
@@ -82,27 +88,136 @@ const INTEGRATIONS = [
   { id: 'cloudflare', name: 'Cloudflare', description: 'Edge & storage' },
 ]
 
+const INTEGRATION_IDS = new Set(['email', 'calendar', 'notion', 'linear'])
+
 function App() {
   const [activeItem, setActiveItem] = useState('dashboard')
   const [loadedDocument, setLoadedDocument] = useState(null)
-  const [view, setView] = useState('dashboard')
+  const [showAnalysis, setShowAnalysis] = useState(false)
 
   const handleDocumentLoaded = (doc) => {
     setLoadedDocument(doc)
-    setView('analysis')
+    setShowAnalysis(true)
   }
 
   const handleBackToDashboard = () => {
-    setView('dashboard')
+    setShowAnalysis(false)
+    setLoadedDocument(null)
+  }
+
+  const handleSidebarClick = (itemId) => {
+    setActiveItem(itemId)
+    // Leaving analysis view when navigating away
+    if (itemId !== 'dashboard') {
+      setShowAnalysis(false)
+      setLoadedDocument(null)
+    }
   }
 
   useEffect(() => {
     const titles = {
       dashboard: 'Dashboard — Compass AI',
-      analysis: 'Document Analysis — Compass AI',
+      deals: 'Deal Analysis — Compass AI',
+      documents: 'Documents — Compass AI',
+      timeline: 'Timeline — Compass AI',
+      email: 'Email — Compass AI',
+      calendar: 'Calendar — Compass AI',
+      notion: 'Notion — Compass AI',
+      linear: 'Linear — Compass AI',
+      team: 'Team — Compass AI',
+      settings: 'Settings — Compass AI',
     }
-    document.title = titles[view] || 'Compass AI — Your AI-Powered Legal Intelligence Agent'
-  }, [view])
+    document.title = titles[activeItem] || 'Compass AI — Your AI-Powered Legal Intelligence Agent'
+  }, [activeItem])
+
+  const renderMainContent = () => {
+    // Document analysis overlay takes priority
+    if (activeItem === 'dashboard' && showAnalysis && loadedDocument) {
+      return <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
+    }
+
+    if (activeItem === 'deals') return <DealsPage />
+    if (activeItem === 'documents') return <DocumentsPage />
+    if (activeItem === 'timeline') return <TimelinePage />
+    if (INTEGRATION_IDS.has(activeItem)) return <IntegrationPage integrationId={activeItem} />
+    if (activeItem === 'team') return <TeamPage />
+    if (activeItem === 'settings') return <SettingsPage />
+
+    // Default: dashboard
+    return (
+      <>
+        <div className="page-header">
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">
+            AI-powered legal intelligence workspace for deal analysis
+          </p>
+        </div>
+
+        <div className="section">
+          <h2 className="section-title">Analyze Document</h2>
+          <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
+        </div>
+
+        <div className="section">
+          <h2 className="section-title">Active Deals</h2>
+          <div className="cards-grid">
+            {DEALS.map((deal) => (
+              <div
+                key={deal.id}
+                className="card"
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleSidebarClick('deals')}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open deal: ${deal.title}`}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSidebarClick('deals') }}
+              >
+                <div className="card-header">
+                  <h3 className="card-title">{deal.title}</h3>
+                  <span className={`card-status ${deal.status}`}>
+                    {deal.status}
+                  </span>
+                </div>
+                <p className="card-description">{deal.description}</p>
+                <div className="card-meta">
+                  <span className="card-meta-item">{deal.docs} docs</span>
+                  <span className="card-meta-item">{deal.parties} parties</span>
+                  <span className="card-meta-item">{deal.updated}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="section">
+          <h2 className="section-title">MCP Integrations</h2>
+          <div className="integrations-grid">
+            {INTEGRATIONS.map((integration) => (
+              <div
+                key={integration.id}
+                className="integration-card"
+                onClick={() => handleSidebarClick(integration.id === 'gcal' ? 'calendar' : integration.id)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Configure ${integration.name} integration`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSidebarClick(integration.id === 'gcal' ? 'calendar' : integration.id)
+                  }
+                }}
+              >
+                <div className="integration-icon" aria-hidden="true"><Icon name={integration.id} /></div>
+                <div className="integration-info">
+                  <h4>{integration.name}</h4>
+                  <p>{integration.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <div className="app">
@@ -114,8 +229,20 @@ function App() {
           </div>
         </div>
         <div className="header-right">
-          <button className="btn btn-ghost" aria-label="Invite team member">Invite</button>
-          <button className="btn btn-primary" aria-label="Create new deal">+ New Deal</button>
+          <button
+            className="btn btn-ghost"
+            aria-label="Invite team member"
+            onClick={() => handleSidebarClick('team')}
+          >
+            Invite
+          </button>
+          <button
+            className="btn btn-primary"
+            aria-label="Create new deal"
+            onClick={() => handleSidebarClick('deals')}
+          >
+            + New Deal
+          </button>
         </div>
       </header>
 
@@ -129,7 +256,7 @@ function App() {
                   key={item.id}
                   type="button"
                   className={`sidebar-item ${activeItem === item.id ? 'active' : ''}`}
-                  onClick={() => setActiveItem(item.id)}
+                  onClick={() => handleSidebarClick(item.id)}
                   aria-label={item.label}
                   aria-current={activeItem === item.id ? 'page' : undefined}
                 >
@@ -142,60 +269,7 @@ function App() {
         </nav>
 
         <main className="main" id="main-content">
-          {view === 'analysis' && loadedDocument ? (
-            <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
-          ) : (
-            <>
-              <div className="page-header">
-                <h1 className="page-title">Dashboard</h1>
-                <p className="page-subtitle">
-                  AI-powered legal intelligence workspace for deal analysis
-                </p>
-              </div>
-
-              <div className="section">
-                <h2 className="section-title">Analyze Document</h2>
-                <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
-              </div>
-
-              <div className="section">
-                <h2 className="section-title">Active Deals</h2>
-                <div className="cards-grid">
-                  {DEALS.map((deal) => (
-                    <div key={deal.id} className="card">
-                      <div className="card-header">
-                        <h3 className="card-title">{deal.title}</h3>
-                        <span className={`card-status ${deal.status}`}>
-                          {deal.status}
-                        </span>
-                      </div>
-                      <p className="card-description">{deal.description}</p>
-                      <div className="card-meta">
-                        <span className="card-meta-item">{deal.docs} docs</span>
-                        <span className="card-meta-item">{deal.parties} parties</span>
-                        <span className="card-meta-item">{deal.updated}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="section">
-                <h2 className="section-title">MCP Integrations</h2>
-                <div className="integrations-grid">
-                  {INTEGRATIONS.map((integration) => (
-                    <div key={integration.id} className="integration-card">
-                      <div className="integration-icon" aria-hidden="true"><Icon name={integration.id} /></div>
-                      <div className="integration-info">
-                        <h4>{integration.name}</h4>
-                        <p>{integration.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          {renderMainContent()}
         </main>
       </div>
     </div>

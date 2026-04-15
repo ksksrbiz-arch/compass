@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { escapeHtml, sanitizeMarkdown } from '../utils/sanitize.js'
 
@@ -15,13 +15,7 @@ export default function AnalysisChat({ document, onBack }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  useEffect(() => {
-    if (document && !structureExtracted) {
-      extractStructure()
-    }
-  }, [document])
-
-  const extractStructure = async () => {
+  const extractStructure = useCallback(async () => {
     setIsLoading(true)
     setMessages([{
       role: 'assistant',
@@ -63,7 +57,13 @@ export default function AnalysisChat({ document, onBack }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [document, structureExtracted])
+
+  useEffect(() => {
+    if (document && !structureExtracted) {
+      extractStructure()
+    }
+  }, [document, structureExtracted, extractStructure])
 
   const sendMessage = async (e) => {
     e.preventDefault()

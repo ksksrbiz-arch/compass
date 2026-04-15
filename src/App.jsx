@@ -14,10 +14,10 @@ const SIDEBAR_SECTIONS = [
   {
     title: 'Workspace',
     items: [
-      { id: 'dashboard', label: 'Dashboard', active: true },
-      { id: 'deals', label: 'Deal Analysis' },
+      { id: 'dashboard', label: 'Dashboard' },
+      { id: 'deals', label: 'Deal Analysis', badge: '4' },
       { id: 'documents', label: 'Documents' },
-      { id: 'timeline', label: 'Timeline' },
+      { id: 'timeline', label: 'Timeline', badge: '2' },
     ],
   },
   {
@@ -47,6 +47,7 @@ const DEALS = [
     docs: 24,
     parties: 4,
     updated: '2h ago',
+    progress: 72,
   },
   {
     id: 2,
@@ -56,6 +57,7 @@ const DEALS = [
     docs: 18,
     parties: 3,
     updated: '4h ago',
+    progress: 55,
   },
   {
     id: 3,
@@ -65,6 +67,7 @@ const DEALS = [
     docs: 9,
     parties: 2,
     updated: '1d ago',
+    progress: 30,
   },
   {
     id: 4,
@@ -74,6 +77,7 @@ const DEALS = [
     docs: 42,
     parties: 6,
     updated: '30m ago',
+    progress: 88,
   },
 ]
 
@@ -88,12 +92,28 @@ const INTEGRATIONS = [
   { id: 'cloudflare', name: 'Cloudflare', description: 'Edge & storage' },
 ]
 
+const ACTIVITY = [
+  { id: 1, text: <><strong>Sarah Chen</strong> uploaded <strong>Term Sheet v4.pdf</strong></>, deal: 'Acme Corp', time: '2 min ago', color: '#6366f1' },
+  { id: 2, text: <><strong>Marcus Liu</strong> completed review of <strong>NovaTech APA Draft</strong></>, deal: 'NovaTech', time: '41 min ago', color: '#22c55e' },
+  { id: 3, text: <><strong>AI Analysis</strong> flagged 3 non-standard clauses in <strong>Merger Agreement</strong></>, deal: 'Helios + Prism', time: '1h ago', color: '#f59e0b' },
+  { id: 4, text: <><strong>James Okafor</strong> added a note to <strong>DOJ Filing</strong></>, deal: 'Helios + Prism', time: '3h ago', color: '#6366f1' },
+  { id: 5, text: <><strong>Priya Nair</strong> started negotiation session for <strong>Meridian IP License</strong></>, deal: 'Meridian Labs', time: '5h ago', color: '#a855f7' },
+]
+
+const STATS = [
+  { label: 'Active Deals', value: '4', change: '+1 this week', variant: 'accent', iconName: 'deals' },
+  { label: 'Documents', value: '93', change: '+12 today', variant: 'success', iconName: 'documents' },
+  { label: 'Team Members', value: '5', change: 'All active', variant: 'warning', iconName: 'team' },
+  { label: 'Deadlines', value: '2', change: 'Next 7 days', variant: 'cyan', iconName: 'timeline' },
+]
+
 const INTEGRATION_IDS = new Set(['email', 'calendar', 'notion', 'linear'])
 
 function App() {
   const [activeItem, setActiveItem] = useState('dashboard')
   const [loadedDocument, setLoadedDocument] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
 
   const handleDocumentLoaded = (doc) => {
     setLoadedDocument(doc)
@@ -107,7 +127,6 @@ function App() {
 
   const handleSidebarClick = (itemId) => {
     setActiveItem(itemId)
-    // Leaving analysis view when navigating away
     if (itemId !== 'dashboard') {
       setShowAnalysis(false)
       setLoadedDocument(null)
@@ -131,7 +150,6 @@ function App() {
   }, [activeItem])
 
   const renderMainContent = () => {
-    // Document analysis overlay takes priority
     if (activeItem === 'dashboard' && showAnalysis && loadedDocument) {
       return <AnalysisChat document={loadedDocument} onBack={handleBackToDashboard} />
     }
@@ -145,52 +163,116 @@ function App() {
 
     // Default: dashboard
     return (
-      <>
+      <div className="fade-in">
         <div className="page-header">
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">
-            AI-powered legal intelligence workspace for deal analysis
+            AI-powered legal intelligence workspace · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
-        <div className="section">
-          <h2 className="section-title">Analyze Document</h2>
-          <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
+        {/* Stats row */}
+        <div className="stats-row">
+          {STATS.map((stat) => (
+            <div key={stat.label} className={`stat-card ${stat.variant}`}>
+              <div className="stat-top">
+                <span className="stat-label">{stat.label}</span>
+                <div className={`stat-icon ${stat.variant}`}>
+                  <Icon name={stat.iconName} />
+                </div>
+              </div>
+              <div className="stat-value">{stat.value}</div>
+              <div className={`stat-change ${stat.variant === 'danger' ? 'neutral' : 'up'}`}>
+                ↑ {stat.change}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="section">
-          <h2 className="section-title">Active Deals</h2>
-          <div className="cards-grid">
-            {DEALS.map((deal) => (
-              <div
-                key={deal.id}
-                className="card"
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSidebarClick('deals')}
-                role="button"
-                tabIndex={0}
-                aria-label={`Open deal: ${deal.title}`}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSidebarClick('deals') }}
-              >
-                <div className="card-header">
-                  <h3 className="card-title">{deal.title}</h3>
-                  <span className={`card-status ${deal.status}`}>
-                    {deal.status}
-                  </span>
-                </div>
-                <p className="card-description">{deal.description}</p>
-                <div className="card-meta">
-                  <span className="card-meta-item">{deal.docs} docs</span>
-                  <span className="card-meta-item">{deal.parties} parties</span>
-                  <span className="card-meta-item">{deal.updated}</span>
+          <div className="section-header">
+            <h2 className="section-title">Analyze Document</h2>
+          </div>
+          <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
+          <div>
+            <div className="section">
+              <div className="section-header">
+                <h2 className="section-title">Active Deals</h2>
+                <button className="section-link" onClick={() => handleSidebarClick('deals')}>
+                  View all →
+                </button>
+              </div>
+              <div className="cards-grid">
+                {DEALS.map((deal) => (
+                  <div
+                    key={deal.id}
+                    className="card"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSidebarClick('deals')}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open deal: ${deal.title}`}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSidebarClick('deals') }}
+                  >
+                    <div className="card-header">
+                      <h3 className="card-title">{deal.title}</h3>
+                      <span className={`card-status ${deal.status}`}>
+                        {deal.status}
+                      </span>
+                    </div>
+                    <p className="card-description">{deal.description}</p>
+                    <div className="card-meta">
+                      <span className="card-meta-item">{deal.docs} docs</span>
+                      <span className="card-meta-item">{deal.parties} parties</span>
+                      <span className="card-meta-item">{deal.updated}</span>
+                    </div>
+                    <div className="deal-progress">
+                      <div
+                        className={`deal-progress-bar ${deal.status}`}
+                        style={{ width: `${deal.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="section">
+              <div className="section-header">
+                <h2 className="section-title">Recent Activity</h2>
+              </div>
+              <div className="card" style={{ padding: '8px 0' }}>
+                <div className="activity-feed">
+                  {ACTIVITY.map((item) => (
+                    <div key={item.id} className="activity-item">
+                      <div
+                        className="activity-dot"
+                        style={{ background: item.color }}
+                      />
+                      <div className="activity-content">
+                        <div className="activity-text">{item.text}</div>
+                        <div className="activity-time">{item.deal} · {item.time}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
 
         <div className="section">
-          <h2 className="section-title">MCP Integrations</h2>
+          <div className="section-header">
+            <h2 className="section-title">MCP Integrations</h2>
+            <button className="section-link" onClick={() => handleSidebarClick('email')}>
+              Configure →
+            </button>
+          </div>
           <div className="integrations-grid">
             {INTEGRATIONS.map((integration) => (
               <div
@@ -215,7 +297,7 @@ function App() {
             ))}
           </div>
         </div>
-      </>
+      </div>
     )
   }
 
@@ -225,24 +307,61 @@ function App() {
       <header className="header" role="banner">
         <div className="header-left">
           <div className="logo">
-            <span>&bull;</span> Compass <span className="logo-ai">AI</span>
+            <span className="logo-dot" aria-hidden="true" />
+            Compass <span className="logo-ai">AI</span>
+          </div>
+          <div className="header-search" role="search">
+            <span className="header-search-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input
+              type="search"
+              className="header-search-input"
+              placeholder="Search deals, documents…"
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              aria-label="Search"
+            />
           </div>
         </div>
         <div className="header-right">
           <button
-            className="btn btn-ghost"
+            className="header-icon-btn"
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span className="notif-badge" aria-label="2 notifications" />
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
             aria-label="Invite team member"
             onClick={() => handleSidebarClick('team')}
           >
             Invite
           </button>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
             aria-label="Create new deal"
             onClick={() => handleSidebarClick('deals')}
           >
             + New Deal
           </button>
+          <div
+            className="header-avatar"
+            role="button"
+            tabIndex={0}
+            aria-label="User profile"
+            onClick={() => handleSidebarClick('settings')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSidebarClick('settings') }}
+          >
+            SC
+          </div>
         </div>
       </header>
 
@@ -262,10 +381,29 @@ function App() {
                 >
                   <span className="sidebar-icon" aria-hidden="true"><Icon name={item.id} /></span>
                   {item.label}
+                  {item.badge && (
+                    <span className="sidebar-badge" aria-label={`${item.badge} items`}>{item.badge}</span>
+                  )}
                 </button>
               ))}
             </div>
           ))}
+
+          <div style={{ marginTop: 'auto', padding: '0 10px' }}>
+            <div style={{
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-accent-soft)',
+              border: '1px solid rgba(99,102,241,0.2)',
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-accent-hover)', marginBottom: 4 }}>
+                ✦ AI Ready
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                Claude Sonnet · Upload a document to start analysis
+              </div>
+            </div>
+          </div>
         </nav>
 
         <main className="main" id="main-content">

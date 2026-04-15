@@ -1,7 +1,12 @@
+import { useState } from 'react'
+
+const TODAY = new Date('2026-04-15')
+
 const TIMELINE_EVENTS = [
   {
     id: 1,
     date: 'Apr 18, 2026',
+    dateObj: new Date('2026-04-18'),
     title: 'LOI Expiration — Helios + Prism',
     type: 'deadline',
     deal: 'Merger Review — Helios + Prism',
@@ -11,6 +16,7 @@ const TIMELINE_EVENTS = [
   {
     id: 2,
     date: 'Apr 22, 2026',
+    dateObj: new Date('2026-04-22'),
     title: 'Closing — Series B Acme Corp',
     type: 'closing',
     deal: 'Series B — Acme Corp',
@@ -20,6 +26,7 @@ const TIMELINE_EVENTS = [
   {
     id: 3,
     date: 'Apr 25, 2026',
+    dateObj: new Date('2026-04-25'),
     title: 'Partner Review — NovaTech APA',
     type: 'review',
     deal: 'Asset Purchase — NovaTech',
@@ -29,6 +36,7 @@ const TIMELINE_EVENTS = [
   {
     id: 4,
     date: 'May 2, 2026',
+    dateObj: new Date('2026-05-02'),
     title: 'Regulatory Filing — DOJ',
     type: 'filing',
     deal: 'Merger Review — Helios + Prism',
@@ -38,6 +46,7 @@ const TIMELINE_EVENTS = [
   {
     id: 5,
     date: 'May 10, 2026',
+    dateObj: new Date('2026-05-10'),
     title: 'Royalty Rate Negotiation — Meridian',
     type: 'negotiation',
     deal: 'IP License — Meridian Labs',
@@ -47,6 +56,7 @@ const TIMELINE_EVENTS = [
   {
     id: 6,
     date: 'May 20, 2026',
+    dateObj: new Date('2026-05-20'),
     title: 'Escrow Release — NovaTech',
     type: 'financial',
     deal: 'Asset Purchase — NovaTech',
@@ -55,77 +65,181 @@ const TIMELINE_EVENTS = [
   },
 ]
 
-const TYPE_COLORS = {
-  deadline: { bg: 'rgba(239,68,68,0.12)', color: 'var(--color-danger)', label: 'Deadline' },
-  closing: { bg: 'rgba(34,197,94,0.12)', color: 'var(--color-success)', label: 'Closing' },
-  review: { bg: 'rgba(99,102,241,0.12)', color: 'var(--color-accent)', label: 'Review' },
-  filing: { bg: 'rgba(245,158,11,0.12)', color: 'var(--color-warning)', label: 'Filing' },
-  negotiation: { bg: 'rgba(99,102,241,0.12)', color: 'var(--color-accent)', label: 'Negotiation' },
-  financial: { bg: 'rgba(34,197,94,0.12)', color: 'var(--color-success)', label: 'Financial' },
+const TYPE_CONFIG = {
+  deadline: { bg: 'rgba(239,68,68,0.12)', color: 'var(--color-danger)', label: 'Deadline', icon: '⚑' },
+  closing: { bg: 'rgba(34,197,94,0.12)', color: 'var(--color-success)', label: 'Closing', icon: '✓' },
+  review: { bg: 'rgba(99,102,241,0.12)', color: 'var(--color-accent)', label: 'Review', icon: '◎' },
+  filing: { bg: 'rgba(245,158,11,0.12)', color: 'var(--color-warning)', label: 'Filing', icon: '⊞' },
+  negotiation: { bg: 'rgba(99,102,241,0.12)', color: 'var(--color-accent)', label: 'Negotiation', icon: '↔' },
+  financial: { bg: 'rgba(34,197,94,0.12)', color: 'var(--color-success)', label: 'Financial', icon: '$' },
 }
 
-const PRIORITY_DOT = {
+const PRIORITY_COLORS = {
   high: 'var(--color-danger)',
   medium: 'var(--color-warning)',
   low: 'var(--color-success)',
 }
 
+function getDaysUntil(dateObj) {
+  const diff = Math.ceil((dateObj - TODAY) / (1000 * 60 * 60 * 24))
+  if (diff === 0) return { label: 'Today', urgent: true }
+  if (diff === 1) return { label: 'Tomorrow', urgent: true }
+  if (diff < 0) return { label: `${Math.abs(diff)}d ago`, past: true }
+  if (diff <= 7) return { label: `${diff} days`, urgent: true }
+  return { label: `${diff} days` }
+}
+
 export default function TimelinePage() {
+  const [priorityFilter, setPriorityFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+
+  const filtered = TIMELINE_EVENTS.filter(e => {
+    if (priorityFilter !== 'all' && e.priority !== priorityFilter) return false
+    if (typeFilter !== 'all' && e.type !== typeFilter) return false
+    return true
+  })
+
+  const urgentCount = TIMELINE_EVENTS.filter(e => {
+    const { urgent } = getDaysUntil(e.dateObj)
+    return urgent
+  }).length
+
   return (
-    <div>
+    <div className="fade-in">
       <div className="page-header">
         <h1 className="page-title">Timeline</h1>
         <p className="page-subtitle">Upcoming deadlines, milestones, and key dates across all deals</p>
       </div>
 
-      <div style={{ position: 'relative', paddingLeft: 32 }}>
-        {/* Vertical line */}
+      {urgentCount > 0 && (
         <div style={{
-          position: 'absolute', left: 11, top: 8, bottom: 8,
-          width: 2, background: 'var(--color-border)', borderRadius: 2,
-        }} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {TIMELINE_EVENTS.map((event) => {
-            const typeStyle = TYPE_COLORS[event.type] || TYPE_COLORS.review
-            return (
-              <div key={event.id} style={{ position: 'relative' }}>
-                {/* Dot on line */}
-                <div style={{
-                  position: 'absolute', left: -27, top: 4,
-                  width: 12, height: 12, borderRadius: '50%',
-                  background: PRIORITY_DOT[event.priority],
-                  border: '2px solid var(--color-bg)',
-                  boxShadow: `0 0 0 2px ${PRIORITY_DOT[event.priority]}33`,
-                }} />
-
-                <div className="card" style={{ padding: '16px 20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{
-                          fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                          background: typeStyle.bg, color: typeStyle.color,
-                        }}>
-                          {typeStyle.label}
-                        </span>
-                        <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{event.date}</span>
-                      </div>
-                      <h3 style={{ fontSize: 15, fontWeight: 600 }}>{event.title}</h3>
-                    </div>
-                    <span style={{ fontSize: 12, color: 'var(--color-text-muted)', flexShrink: 0 }}>
-                      {event.deal}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                    {event.description}
-                  </p>
-                </div>
-              </div>
-            )
-          })}
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '12px 16px', borderRadius: 'var(--radius-md)',
+          background: 'var(--color-danger-soft)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          marginBottom: 20,
+        }}>
+          <span style={{ fontSize: 16 }}>⚠</span>
+          <div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>
+              {urgentCount} upcoming event{urgentCount > 1 ? 's' : ''} within 7 days
+            </span>
+            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', marginLeft: 8 }}>
+              Review deadlines and prepare deliverables
+            </span>
+          </div>
         </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['all', 'high', 'medium', 'low'].map(p => (
+            <button
+              key={p}
+              type="button"
+              className={`btn btn-sm ${priorityFilter === p ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setPriorityFilter(p)}
+              style={{ textTransform: 'capitalize' }}
+            >
+              {p === 'all' ? 'All Priority' : `${p.charAt(0).toUpperCase() + p.slice(1)} Priority`}
+            </button>
+          ))}
+        </div>
+        <select
+          value={typeFilter}
+          onChange={e => setTypeFilter(e.target.value)}
+          style={{
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: '5px 10px',
+            color: 'var(--color-text)',
+            fontSize: 13,
+            fontFamily: 'inherit',
+            outline: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <option value="all">All Types</option>
+          {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+            <option key={key} value={key}>{cfg.label}</option>
+          ))}
+        </select>
       </div>
+
+      {filtered.length === 0 ? (
+        <div className="card empty-state">
+          <div className="empty-icon" style={{ fontSize: 24 }}>📅</div>
+          <div className="empty-title">No events match</div>
+          <div className="empty-desc">Try adjusting your filters to see timeline events.</div>
+        </div>
+      ) : (
+        <div style={{ position: 'relative', paddingLeft: 36 }}>
+          {/* Vertical line */}
+          <div style={{
+            position: 'absolute', left: 13, top: 12, bottom: 12,
+            width: 2,
+            background: 'linear-gradient(to bottom, var(--color-accent), var(--color-border))',
+            borderRadius: 2,
+          }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {filtered.map((event) => {
+              const typeStyle = TYPE_CONFIG[event.type] || TYPE_CONFIG.review
+              const countdown = getDaysUntil(event.dateObj)
+              return (
+                <div key={event.id} style={{ position: 'relative' }} className="fade-in">
+                  {/* Dot on line */}
+                  <div style={{
+                    position: 'absolute', left: -29, top: 16,
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: PRIORITY_COLORS[event.priority],
+                    border: '2px solid var(--color-bg)',
+                    boxShadow: `0 0 0 3px ${PRIORITY_COLORS[event.priority]}33`,
+                    zIndex: 1,
+                  }} />
+
+                  <div className="card" style={{ padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 5 }}>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20,
+                            background: typeStyle.bg, color: typeStyle.color,
+                            border: `1px solid ${typeStyle.color}33`,
+                          }}>
+                            {typeStyle.icon} {typeStyle.label}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{event.date}</span>
+                          <span style={{
+                            fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20,
+                            background: countdown.urgent ? 'var(--color-danger-soft)' : countdown.past ? 'var(--color-border)' : 'var(--color-accent-soft)',
+                            color: countdown.urgent ? 'var(--color-danger)' : countdown.past ? 'var(--color-text-muted)' : 'var(--color-accent)',
+                          }}>
+                            {countdown.label}
+                          </span>
+                        </div>
+                        <h3 style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em' }}>{event.title}</h3>
+                      </div>
+                      <span style={{
+                        fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0,
+                        background: 'var(--color-surface-hover)', padding: '3px 8px', borderRadius: 6,
+                        maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {event.deal}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
+                      {event.description}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

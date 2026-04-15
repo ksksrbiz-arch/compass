@@ -1,16 +1,34 @@
 :root {
-  --color-bg: #0a0a0f;
-  --color-surface: #12121a;
-  --color-surface-hover: #1a1a25;
-  --color-border: #1e1e2e;
-  --color-text: #e4e4ed;
-  --color-text-muted: #8888a0;
+  --color-bg: #080810;
+  --color-surface: #10101c;
+  --color-surface-hover: #181828;
+  --color-surface-elevated: #14142000;
+  --color-border: #1c1c30;
+  --color-border-subtle: #161625;
+  --color-text: #e6e6f0;
+  --color-text-muted: #8080a0;
+  --color-text-faint: #4a4a6a;
   --color-accent: #6366f1;
   --color-accent-hover: #818cf8;
+  --color-accent-soft: rgba(99, 102, 241, 0.12);
+  --color-accent-glow: rgba(99, 102, 241, 0.25);
   --color-success: #22c55e;
+  --color-success-soft: rgba(34, 197, 94, 0.12);
   --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.12);
   --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --color-purple: #a855f7;
+  --color-cyan: #06b6d4;
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 0 20px rgba(99, 102, 241, 0.2);
+  --transition: 0.15s ease;
 }
 
 * {
@@ -28,6 +46,46 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
 #root {
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-glow);
+  color: var(--color-text);
 }

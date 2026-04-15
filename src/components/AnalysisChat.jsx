@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { escapeHtml, sanitizeMarkdown } from '../utils/sanitize.js'
+import { DocumentIcon } from './Icons.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
+
+const SUGGESTED_QUESTIONS = [
+  'What are the key risks in this document?',
+  'Summarize the indemnification clauses',
+  'Who are the parties and what are their obligations?',
+  'Are there any non-standard or unusual terms?',
+  'What are the termination conditions?',
+]
 
 export default function AnalysisChat({ document, onBack }) {
   const [messages, setMessages] = useState([])
@@ -65,11 +74,11 @@ export default function AnalysisChat({ document, onBack }) {
     }
   }, [document, structureExtracted, extractStructure])
 
-  const sendMessage = async (e) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+  const sendMessage = async (e, overrideText) => {
+    if (e) e.preventDefault()
+    const userMessage = (overrideText || input).trim()
+    if (!userMessage || isLoading) return
 
-    const userMessage = input.trim()
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
@@ -108,22 +117,46 @@ export default function AnalysisChat({ document, onBack }) {
     }
   }
 
+  const handleSuggestedQuestion = (q) => {
+    if (!isLoading && structureExtracted) {
+      sendMessage(null, q)
+    }
+  }
+
   return (
     <div className="analysis-container">
       <div className="analysis-header">
-        <button className="btn btn-ghost" onClick={onBack} aria-label="Back to dashboard">Back</button>
+        <button className="btn btn-ghost btn-sm" onClick={onBack} aria-label="Back to dashboard">← Back</button>
         <div className="analysis-doc-info">
+          <div className="analysis-doc-icon" aria-hidden="true">
+            <DocumentIcon />
+          </div>
           <span className="analysis-doc-name">{escapeHtml(document.name)}</span>
           <span className="analysis-doc-size">
             {(document.size / 1024).toFixed(0)} KB
           </span>
         </div>
+        {structureExtracted && (
+          <span style={{
+            marginLeft: 'auto',
+            fontSize: 11,
+            fontWeight: 600,
+            padding: '3px 10px',
+            borderRadius: 20,
+            background: 'var(--color-success-soft)',
+            color: 'var(--color-success)',
+            border: '1px solid rgba(34,197,94,0.2)',
+          }}>
+            ✓ Analyzed
+          </span>
+        )}
       </div>
 
       <div className="analysis-messages">
         {messages.map((msg, i) => (
-          <div key={i} className={`message message-${msg.role}`}>
+          <div key={i} className={`message message-${msg.role} fade-in`}>
             <div className="message-label">
+              {msg.role === 'assistant' && <span className="message-label-dot" />}
               {msg.role === 'assistant' ? 'Compass AI' : 'You'}
             </div>
             <div className="message-content">{msg.content}</div>
@@ -131,10 +164,15 @@ export default function AnalysisChat({ document, onBack }) {
         ))}
 
         {isLoading && (
-          <div className="message message-assistant">
-            <div className="message-label">Compass AI</div>
+          <div className="message message-assistant fade-in">
+            <div className="message-label">
+              <span className="message-label-dot" />
+              Compass AI
+            </div>
             <div className="message-content">
-              <span className="typing-indicator" />
+              <div className="typing-indicator">
+                <span /><span /><span />
+              </div>
             </div>
           </div>
         )}
@@ -142,12 +180,29 @@ export default function AnalysisChat({ document, onBack }) {
         <div ref={messagesEndRef} />
       </div>
 
+      {structureExtracted && messages.length < 3 && (
+        <div className="suggested-questions" role="list" aria-label="Suggested questions">
+          {SUGGESTED_QUESTIONS.map((q) => (
+            <button
+              key={q}
+              type="button"
+              className="suggested-question"
+              onClick={() => handleSuggestedQuestion(q)}
+              disabled={isLoading}
+              role="listitem"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+      )}
+
       <form className="analysis-input" onSubmit={sendMessage}>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={structureExtracted ? 'Ask about this document...' : 'Extracting structure...'}
+          placeholder={structureExtracted ? 'Ask about this document…' : 'Extracting structure…'}
           aria-label="Ask a question about the document"
           disabled={isLoading || !structureExtracted}
         />

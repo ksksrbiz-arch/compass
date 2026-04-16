@@ -407,7 +407,7 @@ export default function DealsPage() {
   const stats = {
     total: deals.length,
     active: deals.filter(d => d.status === 'active').length,
-    totalValue: `$${Math.round(deals.reduce((s, d) => s + (parseFloat((d.value || '0').replace(/[^0-9.]/g, '')) || 0), 0))}M+`,
+    totalValue: `$${deals.reduce((s, d) => s + (parseFloat((d.value || '0').replace(/[^0-9.]/g, '')) || 0), 0).toFixed(0)}M+`,
     avgHealth: deals.length > 0 ? Math.round(deals.reduce((s, d) => s + d.health, 0) / deals.length) : 0,
   }
 

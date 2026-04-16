@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 const ACCENT_COLORS = [
-  { color: '#6366f1', label: 'Indigo' },
-  { color: '#8b5cf6', label: 'Violet' },
-  { color: '#06b6d4', label: 'Cyan' },
-  { color: '#22c55e', label: 'Green' },
-  { color: '#f59e0b', label: 'Amber' },
+  { color: '#6366f1', label: 'Indigo', hover: '#818cf8', soft: 'rgba(99,102,241,0.12)', glow: 'rgba(99,102,241,0.25)' },
+  { color: '#8b5cf6', label: 'Violet', hover: '#a78bfa', soft: 'rgba(139,92,246,0.12)', glow: 'rgba(139,92,246,0.25)' },
+  { color: '#06b6d4', label: 'Cyan', hover: '#22d3ee', soft: 'rgba(6,182,212,0.12)', glow: 'rgba(6,182,212,0.25)' },
+  { color: '#22c55e', label: 'Green', hover: '#4ade80', soft: 'rgba(34,197,94,0.12)', glow: 'rgba(34,197,94,0.25)' },
+  { color: '#f59e0b', label: 'Amber', hover: '#fbbf24', soft: 'rgba(245,158,11,0.12)', glow: 'rgba(245,158,11,0.25)' },
 ]
 
 export default function SettingsPage() {
@@ -25,12 +25,13 @@ export default function SettingsPage() {
   const [accentColor, setAccentColor] = useState('#6366f1')
 
   useEffect(() => {
+    const variant = ACCENT_COLORS.find(c => c.color === accentColor)
+    if (!variant) return
     const root = document.documentElement
     root.style.setProperty('--color-accent', accentColor)
-    // Compute hover/soft/glow variants
-    root.style.setProperty('--color-accent-hover', accentColor + 'cc')
-    root.style.setProperty('--color-accent-soft', accentColor + '1f')
-    root.style.setProperty('--color-accent-glow', accentColor + '40')
+    root.style.setProperty('--color-accent-hover', variant.hover)
+    root.style.setProperty('--color-accent-soft', variant.soft)
+    root.style.setProperty('--color-accent-glow', variant.glow)
   }, [accentColor])
 
   const handleSave = (e) => {

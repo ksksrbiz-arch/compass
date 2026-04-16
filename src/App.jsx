@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import AnalysisChat from './components/AnalysisChat.jsx'
 import { Icon } from './components/Icons.jsx'
@@ -109,11 +109,23 @@ const STATS = [
 
 const INTEGRATION_IDS = new Set(['email', 'calendar', 'notion', 'linear'])
 
+const NOTIFICATIONS = [
+  { id: 1, text: 'AI flagged 3 non-standard clauses in Merger Agreement', deal: 'Helios + Prism', time: '1h ago', color: '#f59e0b', read: false },
+  { id: 2, text: 'Term Sheet v4.pdf uploaded by Sarah Chen', deal: 'Acme Corp', time: '2 min ago', color: '#6366f1', read: false },
+  { id: 3, text: 'Marcus Liu completed review of NovaTech APA Draft', deal: 'NovaTech', time: '41 min ago', color: '#22c55e', read: true },
+  { id: 4, text: 'Closing deadline in 7 days — Series B Acme Corp', deal: 'Acme Corp', time: '2h ago', color: '#ef4444', read: true },
+]
+
 function App() {
   const [activeItem, setActiveItem] = useState('dashboard')
   const [loadedDocument, setLoadedDocument] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(false)
   const [searchValue, setSearchValue] = useState('')
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notifications, setNotifications] = useState(NOTIFICATIONS)
+  const searchRef = useRef(null)
+  const notifRef = useRef(null)
 
   const handleDocumentLoaded = (doc) => {
     setLoadedDocument(doc)
@@ -127,11 +139,27 @@ function App() {
 
   const handleSidebarClick = (itemId) => {
     setActiveItem(itemId)
+    setShowSearchDropdown(false)
+    setShowNotifications(false)
     if (itemId !== 'dashboard') {
       setShowAnalysis(false)
       setLoadedDocument(null)
     }
   }
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSearchDropdown(false)
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     const titles = {
@@ -148,6 +176,24 @@ function App() {
     }
     document.title = titles[activeItem] || 'Compass AI — Your AI-Powered Legal Intelligence Agent'
   }, [activeItem])
+
+  const searchResults = searchValue.trim().length > 0
+    ? [
+        ...DEALS.filter(d =>
+          d.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+          d.description.toLowerCase().includes(searchValue.toLowerCase())
+        ).slice(0, 4).map(d => ({ type: 'deal', id: d.id, title: d.title, sub: d.description, nav: 'deals' })),
+        ...INTEGRATIONS.filter(i =>
+          i.name.toLowerCase().includes(searchValue.toLowerCase())
+        ).slice(0, 2).map(i => ({ type: 'integration', id: i.id, title: i.name, sub: i.description, nav: i.id === 'gcal' ? 'calendar' : i.id })),
+      ]
+    : []
+
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const markAllRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }, [])
 
   const renderMainContent = () => {
     if (activeItem === 'dashboard' && showAnalysis && loadedDocument) {
@@ -310,7 +356,7 @@ function App() {
             <span className="logo-dot" aria-hidden="true" />
             Compass <span className="logo-ai">AI</span>
           </div>
-          <div className="header-search" role="search">
+          <div className="header-search" role="search" ref={searchRef}>
             <span className="header-search-icon" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -321,23 +367,87 @@ function App() {
               className="header-search-input"
               placeholder="Search deals, documents…"
               value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
+              onChange={e => { setSearchValue(e.target.value); setShowSearchDropdown(true) }}
+              onFocus={() => setShowSearchDropdown(true)}
               aria-label="Search"
+              aria-autocomplete="list"
+              aria-expanded={showSearchDropdown && searchResults.length > 0}
             />
+            {showSearchDropdown && searchResults.length > 0 && (
+              <div className="search-dropdown" role="listbox" aria-label="Search results">
+                {searchResults.map((r) => (
+                  <button
+                    key={`${r.type}-${r.id}`}
+                    type="button"
+                    className="search-result-item"
+                    role="option"
+                    onClick={() => {
+                      handleSidebarClick(r.nav)
+                      setSearchValue('')
+                      setShowSearchDropdown(false)
+                    }}
+                  >
+                    <span className="search-result-type">{r.type === 'deal' ? '⚡' : '⚙'}</span>
+                    <span className="search-result-body">
+                      <span className="search-result-title">{r.title}</span>
+                      <span className="search-result-sub">{r.sub}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showSearchDropdown && searchValue.trim().length > 0 && searchResults.length === 0 && (
+              <div className="search-dropdown">
+                <div className="search-no-results">No results for &ldquo;{searchValue}&rdquo;</div>
+              </div>
+            )}
           </div>
         </div>
         <div className="header-right">
-          <button
-            className="header-icon-btn"
-            aria-label="Notifications"
-            title="Notifications"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-            <span className="notif-badge" aria-label="2 notifications" />
-          </button>
+          <div style={{ position: 'relative' }} ref={notifRef}>
+            <button
+              className="header-icon-btn"
+              aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+              title="Notifications"
+              onClick={() => setShowNotifications(v => !v)}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+              {unreadCount > 0 && (
+                <span className="notif-badge" aria-label={`${unreadCount} unread notifications`} />
+              )}
+            </button>
+            {showNotifications && (
+              <div className="notif-panel fade-in" role="dialog" aria-label="Notifications">
+                <div className="notif-panel-header">
+                  <span className="notif-panel-title">Notifications</span>
+                  {unreadCount > 0 && (
+                    <button type="button" className="notif-mark-read" onClick={markAllRead}>
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+                <div className="notif-list">
+                  {notifications.map(n => (
+                    <div
+                      key={n.id}
+                      className={`notif-item${n.read ? ' read' : ''}`}
+                      onClick={() => setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))}
+                    >
+                      <div className="notif-dot" style={{ background: n.color }} />
+                      <div className="notif-content">
+                        <div className="notif-text">{n.text}</div>
+                        <div className="notif-meta">{n.deal} · {n.time}</div>
+                      </div>
+                      {!n.read && <div className="notif-unread-dot" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="btn btn-ghost btn-sm"
             aria-label="Invite team member"

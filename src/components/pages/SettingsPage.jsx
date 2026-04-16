@@ -1,5 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
+
+const ACCENT_COLORS = [
+  { color: '#6366f1', label: 'Indigo', hover: '#818cf8', soft: 'rgba(99,102,241,0.12)', glow: 'rgba(99,102,241,0.25)' },
+  { color: '#8b5cf6', label: 'Violet', hover: '#a78bfa', soft: 'rgba(139,92,246,0.12)', glow: 'rgba(139,92,246,0.25)' },
+  { color: '#06b6d4', label: 'Cyan', hover: '#22d3ee', soft: 'rgba(6,182,212,0.12)', glow: 'rgba(6,182,212,0.25)' },
+  { color: '#22c55e', label: 'Green', hover: '#4ade80', soft: 'rgba(34,197,94,0.12)', glow: 'rgba(34,197,94,0.25)' },
+  { color: '#f59e0b', label: 'Amber', hover: '#fbbf24', soft: 'rgba(245,158,11,0.12)', glow: 'rgba(245,158,11,0.25)' },
+]
 
 export default function SettingsPage() {
   const [workspaceName, setWorkspaceName] = useState('My Legal Workspace')
@@ -8,10 +16,23 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true)
   const [dealAlerts, setDealAlerts] = useState(true)
   const [autoAnalyze, setAutoAnalyze] = useState(false)
+  const [teamDigest, setTeamDigest] = useState(false)
+  const [riskFlags, setRiskFlags] = useState(true)
   const [apiKey, setApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
+  const [accentColor, setAccentColor] = useState('#6366f1')
+
+  useEffect(() => {
+    const variant = ACCENT_COLORS.find(c => c.color === accentColor)
+    if (!variant) return
+    const root = document.documentElement
+    root.style.setProperty('--color-accent', accentColor)
+    root.style.setProperty('--color-accent-hover', variant.hover)
+    root.style.setProperty('--color-accent-soft', variant.soft)
+    root.style.setProperty('--color-accent-glow', variant.glow)
+  }, [accentColor])
 
   const handleSave = (e) => {
     e.preventDefault()
@@ -97,13 +118,7 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <FieldRow label="Accent Color" hint="Primary brand color used throughout the UI">
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {[
-                      { color: '#6366f1', label: 'Indigo' },
-                      { color: '#8b5cf6', label: 'Violet' },
-                      { color: '#06b6d4', label: 'Cyan' },
-                      { color: '#22c55e', label: 'Green' },
-                      { color: '#f59e0b', label: 'Amber' },
-                    ].map(c => (
+                    {ACCENT_COLORS.map(c => (
                       <button
                         key={c.color}
                         type="button"
@@ -111,11 +126,15 @@ export default function SettingsPage() {
                         style={{
                           width: 28, height: 28, borderRadius: '50%',
                           background: c.color,
-                          border: c.color === '#6366f1' ? '3px solid white' : '2px solid transparent',
+                          border: c.color === accentColor ? '3px solid white' : '2px solid transparent',
                           cursor: 'pointer',
                           transition: 'transform var(--transition)',
+                          outline: c.color === accentColor ? `2px solid ${c.color}` : 'none',
+                          outlineOffset: 2,
                         }}
+                        onClick={() => setAccentColor(c.color)}
                         aria-label={`Set accent color to ${c.label}`}
+                        aria-pressed={c.color === accentColor}
                       />
                     ))}
                   </div>
@@ -227,16 +246,16 @@ export default function SettingsPage() {
                 <ToggleRow
                   label="Team Activity Digest"
                   hint="Daily summary of team actions on shared deals"
-                  value={false}
-                  onChange={() => {}}
+                  value={teamDigest}
+                  onChange={setTeamDigest}
                 />
               </div>
               <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 18 }}>
                 <ToggleRow
                   label="AI Risk Flags"
                   hint="Instant notification when AI detects high-risk clauses"
-                  value={true}
-                  onChange={() => {}}
+                  value={riskFlags}
+                  onChange={setRiskFlags}
                 />
               </div>
             </div>

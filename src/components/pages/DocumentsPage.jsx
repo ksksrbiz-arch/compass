@@ -46,7 +46,11 @@ export default function DocumentsPage() {
     d.name.toLowerCase().includes(search.toLowerCase()) ||
     d.deal.toLowerCase().includes(search.toLowerCase()) ||
     (d.type || '').toLowerCase().includes(search.toLowerCase())
-  )
+  ).sort((a, b) => {
+    if (sortBy === 'name') return a.name.localeCompare(b.name)
+    if (sortBy === 'size') return b.size - a.size
+    return 0 // 'uploaded' keeps insertion order (newest first via prepend)
+  })
 
   if (activeDoc && activeDoc.base64) {
     return (

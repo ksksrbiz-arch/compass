@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const TODAY = new Date('2026-04-15')
 
@@ -89,26 +90,132 @@ function getDaysUntil(dateObj) {
   return { label: `${diff} days` }
 }
 
+function AddEventModal({ onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: '',
+    date: '',
+    type: 'deadline',
+    deal: '',
+    priority: 'medium',
+    description: '',
+  })
+  const [error, setError] = useState('')
+
+  const set = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!form.title.trim()) { setError('Title is required.'); return }
+    if (!form.date) { setError('Date is required.'); return }
+    const dateObj = new Date(form.date)
+    const formatted = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    onSave({
+      id: Date.now(),
+      title: form.title.trim(),
+      date: formatted,
+      dateObj,
+      type: form.type,
+      deal: form.deal.trim() || 'General',
+      priority: form.priority,
+      description: form.description.trim() || '',
+    })
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal fade-in" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Add timeline event">
+        <h2 className="modal-title">Add Timeline Event</h2>
+        <p className="modal-subtitle">Add a new deadline, milestone, or key date.</p>
+        {error && (
+          <div style={{ padding: '8px 12px', borderRadius: 8, background: 'var(--color-danger-soft)', color: 'var(--color-danger)', fontSize: 13, marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSubmit}>
+          <div className="modal-field">
+            <label className="modal-label" htmlFor="evt-title">Title *</label>
+            <input id="evt-title" type="text" className="settings-input" placeholder="e.g. Closing — Acme Corp" value={form.title} onChange={set('title')} autoFocus />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="evt-date">Date *</label>
+              <input id="evt-date" type="date" className="settings-input" value={form.date} onChange={set('date')} min="2026-01-01" />
+            </div>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="evt-priority">Priority</label>
+              <select id="evt-priority" className="settings-input" value={form.priority} onChange={set('priority')}>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="evt-type">Event Type</label>
+              <select id="evt-type" className="settings-input" value={form.type} onChange={set('type')}>
+                {Object.entries(TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="evt-deal">Related Deal</label>
+              <input id="evt-deal" type="text" className="settings-input" placeholder="Deal name" value={form.deal} onChange={set('deal')} />
+            </div>
+          </div>
+          <div className="modal-field">
+            <label className="modal-label" htmlFor="evt-desc">Description</label>
+            <textarea id="evt-desc" className="settings-input" placeholder="Optional notes…" value={form.description} onChange={set('description')} rows={3} style={{ resize: 'vertical' }} />
+          </div>
+          <div className="modal-actions">
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-primary btn-sm">Add Event</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+AddEventModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+}
+
 export default function TimelinePage() {
+  const [events, setEvents] = useState(TIMELINE_EVENTS)
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [showAddEvent, setShowAddEvent] = useState(false)
 
-  const filtered = TIMELINE_EVENTS.filter(e => {
+  const filtered = events.filter(e => {
     if (priorityFilter !== 'all' && e.priority !== priorityFilter) return false
     if (typeFilter !== 'all' && e.type !== typeFilter) return false
     return true
-  })
+  }).sort((a, b) => a.dateObj - b.dateObj)
 
-  const urgentCount = TIMELINE_EVENTS.filter(e => {
+  const urgentCount = events.filter(e => {
     const { urgent } = getDaysUntil(e.dateObj)
     return urgent
   }).length
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Timeline</h1>
-        <p className="page-subtitle">Upcoming deadlines, milestones, and key dates across all deals</p>
+      {showAddEvent && (
+        <AddEventModal
+          onClose={() => setShowAddEvent(false)}
+          onSave={(evt) => setEvents(prev => [...prev, evt])}
+        />
+      )}
+
+      <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <h1 className="page-title">Timeline</h1>
+          <p className="page-subtitle">Upcoming deadlines, milestones, and key dates across all deals</p>
+        </div>
+        <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 6 }} onClick={() => setShowAddEvent(true)}>
+          + Add Event
+        </button>
       </div>
 
       {urgentCount > 0 && (

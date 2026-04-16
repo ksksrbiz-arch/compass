@@ -90,6 +90,144 @@ const RISK_COLORS = {
   high: { color: 'var(--color-danger)', bg: 'var(--color-danger-soft)', label: 'High Risk' },
 }
 
+const DEAL_TYPES = [
+  'Venture Financing',
+  'Asset Purchase',
+  'IP License',
+  'Merger',
+  'Acquisition',
+  'Joint Venture',
+  'Real Estate',
+  'Other',
+]
+
+function NewDealModal({ onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: '',
+    type: 'Venture Financing',
+    value: '',
+    lead: '',
+    description: '',
+    status: 'pending',
+  })
+  const [error, setError] = useState('')
+
+  const set = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!form.title.trim()) { setError('Deal name is required.'); return }
+    if (!form.lead.trim()) { setError('Lead attorney is required.'); return }
+    const newDeal = {
+      id: Date.now(),
+      title: form.title.trim(),
+      type: form.type,
+      value: form.value.trim() || 'Undisclosed',
+      lead: form.lead.trim(),
+      description: form.description.trim() || 'New deal — no description yet.',
+      status: form.status,
+      docs: 0,
+      parties: 1,
+      updated: 'just now',
+      parties_list: [],
+      notes: '',
+      progress: 0,
+      health: 80,
+      riskLevel: 'low',
+      openItems: 0,
+    }
+    onSave(newDeal)
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal fade-in" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Create new deal">
+        <h2 className="modal-title">New Deal</h2>
+        <p className="modal-subtitle">Create a new deal to track in your workspace.</p>
+        {error && (
+          <div style={{ padding: '8px 12px', borderRadius: 8, background: 'var(--color-danger-soft)', color: 'var(--color-danger)', fontSize: 13, marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSubmit}>
+          <div className="modal-field">
+            <label className="modal-label" htmlFor="new-deal-title">Deal Name *</label>
+            <input
+              id="new-deal-title"
+              type="text"
+              className="settings-input"
+              placeholder="e.g. Series A — Acme Corp"
+              value={form.title}
+              onChange={set('title')}
+              autoFocus
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="new-deal-type">Deal Type</label>
+              <select id="new-deal-type" className="settings-input" value={form.type} onChange={set('type')}>
+                {DEAL_TYPES.map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="new-deal-status">Status</label>
+              <select id="new-deal-status" className="settings-input" value={form.status} onChange={set('status')}>
+                {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="new-deal-value">Deal Value</label>
+              <input
+                id="new-deal-value"
+                type="text"
+                className="settings-input"
+                placeholder="e.g. $10M"
+                value={form.value}
+                onChange={set('value')}
+              />
+            </div>
+            <div className="modal-field">
+              <label className="modal-label" htmlFor="new-deal-lead">Lead Attorney *</label>
+              <input
+                id="new-deal-lead"
+                type="text"
+                className="settings-input"
+                placeholder="e.g. Sarah Chen"
+                value={form.lead}
+                onChange={set('lead')}
+              />
+            </div>
+          </div>
+          <div className="modal-field">
+            <label className="modal-label" htmlFor="new-deal-desc">Description</label>
+            <textarea
+              id="new-deal-desc"
+              className="settings-input"
+              placeholder="Brief deal description…"
+              value={form.description}
+              onChange={set('description')}
+              rows={3}
+              style={{ resize: 'vertical' }}
+            />
+          </div>
+          <div className="modal-actions">
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-primary btn-sm">Create Deal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+NewDealModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+}
+
 function HealthBar({ value }) {
   const color = value >= 80 ? 'var(--color-success)' : value >= 60 ? 'var(--color-warning)' : 'var(--color-danger)'
   return (
@@ -255,24 +393,33 @@ InfoRow.propTypes = {
 }
 
 export default function DealsPage() {
+  const [deals, setDeals] = useState(INITIAL_DEALS)
   const [selectedDeal, setSelectedDeal] = useState(null)
   const [filter, setFilter] = useState('all')
+  const [showNewDeal, setShowNewDeal] = useState(false)
 
-  const filtered = filter === 'all' ? INITIAL_DEALS : INITIAL_DEALS.filter(d => d.status === filter)
+  const filtered = filter === 'all' ? deals : deals.filter(d => d.status === filter)
 
   if (selectedDeal) {
     return <DealDetail deal={selectedDeal} onBack={() => setSelectedDeal(null)} />
   }
 
   const stats = {
-    total: INITIAL_DEALS.length,
-    active: INITIAL_DEALS.filter(d => d.status === 'active').length,
-    totalValue: '$277M+',
-    avgHealth: Math.round(INITIAL_DEALS.reduce((s, d) => s + d.health, 0) / INITIAL_DEALS.length),
+    total: deals.length,
+    active: deals.filter(d => d.status === 'active').length,
+    totalValue: `$${Math.round(deals.reduce((s, d) => s + (parseFloat((d.value || '0').replace(/[^0-9.]/g, '')) || 0), 0))}M+`,
+    avgHealth: deals.length > 0 ? Math.round(deals.reduce((s, d) => s + d.health, 0) / deals.length) : 0,
   }
 
   return (
     <div className="fade-in">
+      {showNewDeal && (
+        <NewDealModal
+          onClose={() => setShowNewDeal(false)}
+          onSave={(deal) => setDeals(prev => [deal, ...prev])}
+        />
+      )}
+
       <div className="page-header">
         <h1 className="page-title">Deal Analysis</h1>
         <p className="page-subtitle">Track and analyze all active deals and transactions</p>
@@ -304,12 +451,12 @@ export default function DealsPage() {
             {f === 'all' ? 'All Deals' : STATUS_LABELS[f]}
             {f !== 'closed' && (
               <span style={{ marginLeft: 4, opacity: 0.7 }}>
-                {f === 'all' ? INITIAL_DEALS.length : INITIAL_DEALS.filter(d => d.status === f).length}
+                {f === 'all' ? deals.length : deals.filter(d => d.status === f).length}
               </span>
             )}
           </button>
         ))}
-        <button type="button" className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }}>
+        <button type="button" className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setShowNewDeal(true)}>
           + New Deal
         </button>
       </div>
@@ -343,7 +490,7 @@ export default function DealsPage() {
                       <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{deal.type} · {deal.value}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: risk.bg, color: risk.color }}>{risk.label}</span>
+                      {risk && <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: risk.bg, color: risk.color }}>{risk.label}</span>}
                       <span className={`card-status ${deal.status}`}>{STATUS_LABELS[deal.status]}</span>
                     </div>
                   </div>

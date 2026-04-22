@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { UploadIcon, ArrowDownIcon } from './Icons.jsx'
 
-export default function DocumentUpload({ onDocumentLoaded }) {
+export default function DocumentUpload({ onDocumentLoaded, aiProviderLabel }) {
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
@@ -105,7 +105,7 @@ export default function DocumentUpload({ onDocumentLoaded }) {
           <p className="upload-text">
             {isDragging ? 'Drop PDF here' : 'Drop a contract PDF or click to upload'}
           </p>
-          <p className="upload-hint">PDF up to 20MB — analyzed by Claude</p>
+          <p className="upload-hint">PDF up to 20MB — analyzed by {aiProviderLabel}</p>
         </div>
       )}
 
@@ -116,4 +116,9 @@ export default function DocumentUpload({ onDocumentLoaded }) {
 
 DocumentUpload.propTypes = {
   onDocumentLoaded: PropTypes.func.isRequired,
+  aiProviderLabel: PropTypes.string,
+}
+
+DocumentUpload.defaultProps = {
+  aiProviderLabel: 'Claude',
 }

@@ -13,8 +13,10 @@ const INTEGRATION_DETAILS = {
       'Draft and send from within Compass',
       'Attachment extraction into Documents',
     ],
-    color: '#EA4335',
-    docsUrl: 'https://docs.compass-ai.io/integrations/gmail',
+    setupUrl: 'https://accounts.google.com/signin',
+    docsUrl: 'https://support.google.com/mail/?hl=en#topic=7065107',
+    setupLabel: 'Open Gmail sign-in',
+    docsLabel: 'Open Gmail help center',
   },
   calendar: {
     name: 'Google Calendar',
@@ -26,8 +28,10 @@ const INTEGRATION_DETAILS = {
       'Sync Timeline items to your calendar',
       'Invite co-counsel and counterparties',
     ],
-    color: '#4285F4',
-    docsUrl: 'https://docs.compass-ai.io/integrations/calendar',
+    setupUrl: 'https://calendar.google.com',
+    docsUrl: 'https://support.google.com/calendar/',
+    setupLabel: 'Open Google Calendar',
+    docsLabel: 'Open Calendar help center',
   },
   notion: {
     name: 'Notion',
@@ -39,8 +43,10 @@ const INTEGRATION_DETAILS = {
       'Link Notion databases to deals',
       'Real-time two-way updates',
     ],
-    color: '#e2e2e2',
-    docsUrl: 'https://docs.compass-ai.io/integrations/notion',
+    setupUrl: 'https://www.notion.so/profile/integrations',
+    docsUrl: 'https://www.notion.so/help/category/integrations-api-and-embeds',
+    setupLabel: 'Open Notion integrations',
+    docsLabel: 'Open Notion docs',
   },
   linear: {
     name: 'Linear',
@@ -52,23 +58,80 @@ const INTEGRATION_DETAILS = {
       'Assign tickets to team members',
       'Link issues to specific document clauses',
     ],
-    color: '#5E6AD2',
-    docsUrl: 'https://docs.compass-ai.io/integrations/linear',
+    setupUrl: 'https://linear.app/login',
+    docsUrl: 'https://linear.app/docs/integrations/overview',
+    setupLabel: 'Open Linear workspace',
+    docsLabel: 'Open Linear docs',
+  },
+  supabase: {
+    name: 'Supabase',
+    icon: 'supabase',
+    description: 'Use Supabase for application data, auth, and storage backing services used by Compass.',
+    features: [
+      'Provision auth providers and secure sessions',
+      'Back shared deal data with Postgres',
+      'Store extracted documents and metadata',
+      'Support row-level security for workspace access',
+    ],
+    setupUrl: 'https://supabase.com/dashboard/projects',
+    docsUrl: 'https://supabase.com/docs',
+    setupLabel: 'Open Supabase dashboard',
+    docsLabel: 'Open Supabase docs',
+  },
+  netlify: {
+    name: 'Netlify',
+    icon: 'netlify',
+    description: 'Manage frontend deployments, previews, and environment configuration for Compass.',
+    features: [
+      'Review and publish frontend deploys',
+      'Manage site environment variables',
+      'Use preview deploys for QA',
+      'Inspect build logs and runtime settings',
+    ],
+    setupUrl: 'https://app.netlify.com',
+    docsUrl: 'https://docs.netlify.com',
+    setupLabel: 'Open Netlify app',
+    docsLabel: 'Open Netlify docs',
+  },
+  github: {
+    name: 'GitHub',
+    icon: 'github',
+    description: 'Manage source control, pull requests, workflow automation, and developer access.',
+    features: [
+      'Review pull requests and CI status',
+      'Configure repository and app access',
+      'Monitor workflow automation',
+      'Track issues linked to deal work',
+    ],
+    setupUrl: 'https://github.com/login',
+    docsUrl: 'https://docs.github.com',
+    setupLabel: 'Open GitHub',
+    docsLabel: 'Open GitHub docs',
+  },
+  cloudflare: {
+    name: 'Cloudflare',
+    icon: 'cloudflare',
+    description: 'Configure DNS, edge delivery, and storage services that support Compass deployments.',
+    features: [
+      'Manage DNS and edge routing',
+      'Inspect cache and CDN behavior',
+      'Configure secure origins and tunnels',
+      'Access storage and edge compute services',
+    ],
+    setupUrl: 'https://dash.cloudflare.com',
+    docsUrl: 'https://developers.cloudflare.com',
+    setupLabel: 'Open Cloudflare dashboard',
+    docsLabel: 'Open Cloudflare docs',
   },
 }
 
 export default function IntegrationPage({ integrationId }) {
   const integration = INTEGRATION_DETAILS[integrationId]
-  const [connecting, setConnecting] = useState(false)
-  const [connected, setConnected] = useState(false)
+  const [lastAction, setLastAction] = useState('')
 
-  const handleConnect = () => {
-    setConnecting(true)
-    // Simulate OAuth flow
-    setTimeout(() => {
-      setConnecting(false)
-      setConnected(true)
-    }, 2000)
+  const handleOpen = (url, label) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+    setLastAction(`${label} opened in a new tab.`)
   }
 
   if (!integration) {
@@ -96,95 +159,67 @@ export default function IntegrationPage({ integrationId }) {
           </div>
           <div>
             <h1 className="page-title" style={{ marginBottom: 2 }}>{integration.name}</h1>
-            {connected && (
-              <span style={{
-                fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 20,
-                background: 'var(--color-success-soft)', color: 'var(--color-success)',
-                border: '1px solid rgba(34,197,94,0.2)',
-              }}>
-                ✓ Connected
-              </span>
-            )}
+            <span style={{
+              fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 20,
+              background: 'var(--color-accent-soft)', color: 'var(--color-accent-hover)',
+              border: '1px solid rgba(99,102,241,0.2)',
+            }}>
+              Ready to configure
+            </span>
           </div>
         </div>
         <p className="page-subtitle">{integration.description}</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-        {/* Connect card */}
         <div className="card" style={{ padding: 28 }}>
-          {connected ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: 16,
-                background: 'var(--color-success-soft)',
-                border: '1px solid rgba(34,197,94,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 24, color: 'var(--color-success)', marginBottom: 4,
-              }}>✓</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700 }}>{integration.name} Connected</h3>
-              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                Your {integration.name} account is linked. Compass AI will now sync and surface relevant data automatically.
-              </p>
-              <div style={{
-                padding: '12px 16px', borderRadius: 10,
-                background: 'var(--color-success-soft)',
-                border: '1px solid rgba(34,197,94,0.15)',
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-success)', marginBottom: 2 }}>
-                  Active since just now
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                  Last sync: syncing now…
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-ghost"
-                style={{ borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-danger)', width: '100%', justifyContent: 'center' }}
-                onClick={() => setConnected(false)}
-              >
-                Disconnect {integration.name}
-              </button>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16,
+            background: 'var(--color-accent-soft)',
+            border: '1px solid rgba(99,102,241,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 20,
+          }}>
+            <Icon name={integration.icon} />
+          </div>
+          <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Open a real setup action</h3>
+          <p style={{ fontSize: 13.5, color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.7 }}>
+            Use the official provider links below instead of placeholder actions or dead docs routes.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ width: '100%', justifyContent: 'center', padding: '11px 0' }}
+              onClick={() => handleOpen(integration.setupUrl, integration.setupLabel)}
+            >
+              {integration.setupLabel}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={() => handleOpen(integration.docsUrl, integration.docsLabel)}
+            >
+              {integration.docsLabel}
+            </button>
+          </div>
+          {lastAction && (
+            <div style={{
+              marginTop: 16,
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: 'var(--color-success-soft)',
+              border: '1px solid rgba(34,197,94,0.15)',
+              fontSize: 12.5,
+              color: 'var(--color-success)',
+              fontWeight: 500,
+            }}>
+              {lastAction}
             </div>
-          ) : (
-            <>
-              <div style={{
-                width: 56, height: 56, borderRadius: 16,
-                background: 'var(--color-accent-soft)',
-                border: '1px solid rgba(99,102,241,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 20,
-              }}>
-                <Icon name={integration.icon} />
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Connect {integration.name}</h3>
-              <p style={{ fontSize: 13.5, color: 'var(--color-text-muted)', marginBottom: 24, lineHeight: 1.7 }}>
-                {integration.description}
-              </p>
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center', padding: '11px 0' }}
-                onClick={handleConnect}
-                disabled={connecting}
-              >
-                {connecting ? (
-                  <>
-                    <span style={{
-                      width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)',
-                      borderTopColor: 'white', borderRadius: '50%',
-                      animation: 'spin 0.6s linear infinite', display: 'inline-block',
-                    }} />
-                    Connecting…
-                  </>
-                ) : `Connect ${integration.name}`}
-              </button>
-            </>
           )}
         </div>
 
-        {/* Features card */}
         <div className="card" style={{ padding: 28 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 18 }}>What you&rsquo;ll get</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -192,15 +227,13 @@ export default function IntegrationPage({ integrationId }) {
               <div key={feature} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <span style={{
                   width: 22, height: 22, borderRadius: '50%',
-                  background: connected ? 'var(--color-success-soft)' : 'var(--color-accent-soft)',
-                  color: connected ? 'var(--color-success)' : 'var(--color-accent)',
+                  background: 'var(--color-accent-soft)',
+                  color: 'var(--color-accent)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0, marginTop: 1, fontSize: 11, fontWeight: 700,
-                  border: `1px solid ${connected ? 'rgba(34,197,94,0.2)' : 'rgba(99,102,241,0.2)'}`,
-                  transition: 'all 0.3s ease',
-                  transitionDelay: `${idx * 0.1}s`,
+                  border: '1px solid rgba(99,102,241,0.2)',
                 }}>
-                  {connected ? '✓' : idx + 1}
+                  {idx + 1}
                 </span>
                 <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>{feature}</span>
               </div>
@@ -209,42 +242,22 @@ export default function IntegrationPage({ integrationId }) {
         </div>
       </div>
 
-      {!connected && (
-        <div className="card" style={{ padding: '18px 22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: 10,
-              background: 'var(--color-warning-soft)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--color-warning)', fontSize: 18, flexShrink: 0,
-            }}>⚠</div>
-            <div>
-              <p style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 2 }}>OAuth connection required</p>
-              <p style={{ fontSize: 12.5, color: 'var(--color-text-muted)' }}>
-                You&rsquo;ll be redirected to {integration.name} to authorize Compass AI. We only request the minimum permissions needed.
-              </p>
-            </div>
+      <div className="card" style={{ padding: '18px 22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'var(--color-warning-soft)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--color-warning)', fontSize: 18, flexShrink: 0,
+          }}>↗</div>
+          <div>
+            <p style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 2 }}>Official resources only</p>
+            <p style={{ fontSize: 12.5, color: 'var(--color-text-muted)' }}>
+              Compass now routes this page to live provider destinations instead of 404 documentation placeholders.
+            </p>
           </div>
         </div>
-      )}
-
-      {connected && (
-        <div className="card" style={{ padding: '18px 22px', borderColor: 'rgba(34,197,94,0.15)' }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Integration Status</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-            {[
-              { label: 'Status', value: 'Connected', color: 'var(--color-success)' },
-              { label: 'Permissions', value: 'Read + Write', color: 'var(--color-accent)' },
-              { label: 'Sync', value: 'Real-time', color: 'var(--color-cyan)' },
-            ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center', padding: '10px 0' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: s.color, marginBottom: 2 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

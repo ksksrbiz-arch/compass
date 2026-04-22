@@ -8,6 +8,7 @@ import TimelinePage from './components/pages/TimelinePage.jsx'
 import IntegrationPage from './components/pages/IntegrationPage.jsx'
 import TeamPage from './components/pages/TeamPage.jsx'
 import SettingsPage from './components/pages/SettingsPage.jsx'
+import { getActiveAiModel, getAiProviderLabel, loadAppSettings } from './utils/appSettings.js'
 import './App.css'
 
 const SIDEBAR_SECTIONS = [
@@ -107,7 +108,7 @@ const STATS = [
   { label: 'Deadlines', value: '2', change: 'Next 7 days', variant: 'cyan', iconName: 'timeline' },
 ]
 
-const INTEGRATION_IDS = new Set(['email', 'calendar', 'notion', 'linear'])
+const INTEGRATION_IDS = new Set(['email', 'calendar', 'notion', 'linear', 'supabase', 'netlify', 'github', 'cloudflare'])
 
 const NOTIFICATIONS = [
   { id: 1, text: 'AI flagged 3 non-standard clauses in Merger Agreement', deal: 'Helios + Prism', time: '1h ago', color: '#f59e0b', read: false },
@@ -124,6 +125,7 @@ function App() {
   const [showSearchDropdown, setShowSearchDropdown] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
+  const [appSettings, setAppSettings] = useState(() => loadAppSettings())
   const searchRef = useRef(null)
   const notifRef = useRef(null)
 
@@ -162,6 +164,24 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const syncSettings = (event) => {
+      if (event?.detail) {
+        setAppSettings(event.detail)
+        return
+      }
+
+      setAppSettings(loadAppSettings())
+    }
+
+    window.addEventListener('compass:settings-updated', syncSettings)
+    window.addEventListener('storage', syncSettings)
+    return () => {
+      window.removeEventListener('compass:settings-updated', syncSettings)
+      window.removeEventListener('storage', syncSettings)
+    }
+  }, [])
+
+  useEffect(() => {
     const titles = {
       dashboard: 'Dashboard — Compass AI',
       deals: 'Deal Analysis — Compass AI',
@@ -171,6 +191,10 @@ function App() {
       calendar: 'Calendar — Compass AI',
       notion: 'Notion — Compass AI',
       linear: 'Linear — Compass AI',
+      supabase: 'Supabase — Compass AI',
+      netlify: 'Netlify — Compass AI',
+      github: 'GitHub — Compass AI',
+      cloudflare: 'Cloudflare — Compass AI',
       team: 'Team — Compass AI',
       settings: 'Settings — Compass AI',
     }
@@ -239,7 +263,10 @@ function App() {
           <div className="section-header">
             <h2 className="section-title">Analyze Document</h2>
           </div>
-          <DocumentUpload onDocumentLoaded={handleDocumentLoaded} />
+          <DocumentUpload
+            onDocumentLoaded={handleDocumentLoaded}
+            aiProviderLabel={getAiProviderLabel(appSettings.aiProvider)}
+          />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
@@ -510,7 +537,7 @@ function App() {
                 ✦ AI Ready
               </div>
               <div style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
-                Claude Sonnet · Upload a document to start analysis
+                {`${getAiProviderLabel(appSettings.aiProvider)} · ${getActiveAiModel(appSettings)} · Upload a document to start analysis`}
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { escapeHtml, sanitizeMarkdown } from '../utils/sanitize.js'
+import { getActiveAiModel, loadAppSettings } from '../utils/appSettings.js'
 import { DocumentIcon } from './Icons.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -25,6 +26,8 @@ export default function AnalysisChat({ document, onBack }) {
   }, [messages])
 
   const extractStructure = useCallback(async () => {
+    const settings = loadAppSettings()
+    const provider = settings.aiProvider
     setIsLoading(true)
     setMessages([{
       role: 'assistant',
@@ -44,6 +47,11 @@ export default function AnalysisChat({ document, onBack }) {
               data: document.base64,
             },
           },
+          provider,
+          model: getActiveAiModel(settings),
+          apiKey: provider === 'gemini' ? settings.geminiApiKey : settings.anthropicApiKey,
+          maxTokens: settings.maxTokens,
+          analysisLanguage: settings.analysisLanguage,
           message: 'Extract the structure of this document. Identify: 1) Document type and parties involved, 2) Key sections and their page numbers, 3) Critical clauses (indemnification, termination, non-compete, IP assignment, liability caps, change of control), 4) Any unusual or non-standard terms that warrant closer review. Present this as a structured overview.',
         }),
       })
@@ -79,6 +87,8 @@ export default function AnalysisChat({ document, onBack }) {
     const userMessage = (overrideText || input).trim()
     if (!userMessage || isLoading) return
 
+    const settings = loadAppSettings()
+    const provider = settings.aiProvider
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
@@ -96,6 +106,11 @@ export default function AnalysisChat({ document, onBack }) {
               data: document.base64,
             },
           },
+          provider,
+          model: getActiveAiModel(settings),
+          apiKey: provider === 'gemini' ? settings.geminiApiKey : settings.anthropicApiKey,
+          maxTokens: settings.maxTokens,
+          analysisLanguage: settings.analysisLanguage,
           message: userMessage,
           history: messages.map(m => ({ role: m.role, content: m.content })),
         }),

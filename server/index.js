@@ -40,6 +40,10 @@ const DEFAULT_MODELS = {
   anthropic: 'claude-sonnet-4-6',
   gemini: 'models/gemini-2-5-flash',
 }
+const ALLOWED_MODELS = {
+  anthropic: new Set(['claude-opus-4-7', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001']),
+  gemini: new Set(['models/gemini-2-5-pro', 'models/gemini-2-5-flash']),
+}
 
 function authMiddleware(req, res, next) {
   if (!AUTH_TOKEN) return next() // no token configured = open (dev mode)
@@ -62,11 +66,16 @@ function getProviderConfig(body = {}) {
       ? process.env.GEMINI_API_KEY
       : process.env.ANTHROPIC_API_KEY
   )
+  const requestedModel = String(body.model || '').trim()
+  const model = ALLOWED_MODELS[provider].has(requestedModel)
+    ? requestedModel
+    : DEFAULT_MODELS[provider]
 
   return {
     provider,
     apiKey,
-    model: body.model || DEFAULT_MODELS[provider],
+    model,
+    requestedModel,
     maxTokens: Number(body.maxTokens) || 4096,
     analysisLanguage: body.analysisLanguage || 'English',
   }
@@ -208,6 +217,10 @@ app.post('/api/analyze', authMiddleware, async (req, res) => {
           ? 'A Gemini API key is required.'
           : 'An Anthropic API key is required.',
       })
+    }
+
+    if (providerConfig.requestedModel && providerConfig.requestedModel !== providerConfig.model) {
+      return res.status(400).json({ error: 'Unsupported model selected.' })
     }
 
     const normalizedHistory = normalizeHistory(history)
